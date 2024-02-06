@@ -20,7 +20,7 @@ mongo:
 
 # 房间配置
 rooms:
-  - roomId: '1'
+  - roomId: '1-1'
     pvp: 2
     divide: 1
     name: 1v1PK
@@ -29,7 +29,7 @@ rooms:
     tableType: 1
     prefab: Game1v1
 
-  - roomId: '2'
+  - roomId: '2-1'
     pvp: 6
     divide: 3
     name: 3v3两队
@@ -38,7 +38,7 @@ rooms:
     tableType: 1
     prefab: Game3v3
 
-  - roomId: '3'
+  - roomId: '3-1'
     pvp: 6
     divide: 1
     name: top6选出最牛
@@ -47,7 +47,7 @@ rooms:
     tableType: 1
     prefab: GameTop6
 
-  - roomId: '4'
+  - roomId: '4-1'
     pvp: 6
     divide: 2
     name: 2v2三队

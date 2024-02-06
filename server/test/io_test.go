@@ -2,11 +2,14 @@ package test
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"github.com/lonng/nano/benchmark/wsio"
 	"github.com/lonng/nano/serialize/protobuf"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
 	"sync"
 	"testing"
 	"tetris/pkg/z"
@@ -169,18 +172,30 @@ func client(deviceId, rid string) {
 	}
 }
 
+var (
+	args = flag.String("args", "1-1 1 1", "room robot.count mode")
+)
+
 func TestGame(t *testing.T) {
 	//
 	// wait server startup
+	flag.Parse()
+
+	var (
+		argList       = strings.Split(*args, " ")
+		roomId        = argList[0]
+		robotCount, _ = strconv.Atoi(argList[1])
+	)
+
 	wg := sync.WaitGroup{}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < robotCount; i++ {
 		wg.Add(1)
 		time.Sleep(50 * time.Millisecond)
 		//
 		// 创建客户端
 		go func(index int) {
 			defer wg.Done()
-			client(fmt.Sprintf("robot%d", index), "1")
+			client(fmt.Sprintf("robot%d", index), roomId)
 		}(i)
 	}
 
