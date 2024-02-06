@@ -21,7 +21,7 @@ func NewWaiter(sList []*session.Session, room util.RoomEntity, table util.TableE
 	conf := room.GetConfig()
 	switch conf.RoomType {
 	case proto.RoomType_QUICK:
-		w = NewNormalWaiter(sList, room, table)
+		w = NewQuickWaiter(sList, room, table)
 	default:
 		panic(fmt.Sprintf("NewWaiter unknown room type %s", conf.RoomType))
 	}
@@ -35,7 +35,7 @@ func NewTable(room util.RoomEntity, ss []*session.Session) util.TableEntity {
 	var t util.TableEntity
 	switch conf.TableType {
 	case proto.TableType_NORMAL:
-		t = NewNormalTable(room, ss)
+		t = NewQuickTable(room, ss)
 	default:
 		panic(fmt.Sprintf("NewTable unknown type %s", conf.TableType))
 	}

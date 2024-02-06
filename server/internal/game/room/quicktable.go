@@ -16,7 +16,7 @@ import (
 )
 
 // 桌子
-type Table struct {
+type QuickTable struct {
 	group         *nano.Group
 	tableId       string
 	conf          *config.Room
@@ -37,11 +37,11 @@ type Table struct {
 	res           map[int64]int32
 }
 
-func NewNormalTable(room util.RoomEntity, sList []*session.Session) *Table {
+func NewQuickTable(room util.RoomEntity, sList []*session.Session) *QuickTable {
 	conf := room.GetConfig()
 	now := z.NowUnixMilli()
 	tableId := fmt.Sprintf("%s:%d", conf.RoomId, now)
-	t := &Table{
+	t := &QuickTable{
 		group:         nano.NewGroup(tableId),
 		tableId:       tableId,
 		clients:       make(map[int64]util.ClientEntity, 0),
@@ -82,15 +82,15 @@ func NewNormalTable(room util.RoomEntity, sList []*session.Session) *Table {
 }
 
 // todo：关不掉
-func (t *Table) BackToTable() {
+func (t *QuickTable) BackToTable() {
 	t.ChangeState(proto.TableState_CHECK_RES)
 }
 
-func (t *Table) AfterInit() {
+func (t *QuickTable) AfterInit() {
 	go t.Run()
 }
 
-func (t *Table) Run() {
+func (t *QuickTable) Run() {
 	// 帧
 	ticker := time.NewTicker(33 * time.Millisecond)
 	defer ticker.Stop()
@@ -187,7 +187,7 @@ func (t *Table) Run() {
 	}
 }
 
-func (t *Table) ChangeState(state proto.TableState) {
+func (t *QuickTable) ChangeState(state proto.TableState) {
 	t.state = state
 	var roomList []*proto.Room
 	tableInfo := t.GetInfo()
@@ -237,25 +237,25 @@ func (t *Table) ChangeState(state proto.TableState) {
 	})
 }
 
-func (t *Table) WaiterEntity() util.WaiterEntity {
+func (t *QuickTable) WaiterEntity() util.WaiterEntity {
 	return t.waiter
 }
 
-func (t *Table) Entity(uid int64) util.ClientEntity {
+func (t *QuickTable) Entity(uid int64) util.ClientEntity {
 	return t.clients[uid]
 }
 
-func (t *Table) Ready(s *session.Session) error {
+func (t *QuickTable) Ready(s *session.Session) error {
 	return t.waiter.Ready(s)
 }
 
-func (t *Table) LoadRes(s *session.Session, msg *proto.LoadRes) error {
+func (t *QuickTable) LoadRes(s *session.Session, msg *proto.LoadRes) error {
 	t.res[s.UID()] = msg.Current
 	log.Info("LoadRes down %d", s.UID())
 	return nil
 }
 
-func (t *Table) Update(s *session.Session, msg *proto.UpdateFrame) error {
+func (t *QuickTable) Update(s *session.Session, msg *proto.UpdateFrame) error {
 	if t.state != proto.TableState_GAMING {
 		return nil
 	}
@@ -303,12 +303,12 @@ func (t *Table) Update(s *session.Session, msg *proto.UpdateFrame) error {
 	return nil
 }
 
-func (t *Table) Clear() {
+func (t *QuickTable) Clear() {
 	t.group.Close()
 	t.end <- true
 }
 
-func (t *Table) Leave(s *session.Session) error {
+func (t *QuickTable) Leave(s *session.Session) error {
 	shouldLeaveTable := false
 	switch t.state {
 	case proto.TableState_STATE_NONE:
@@ -345,14 +345,14 @@ func (t *Table) Leave(s *session.Session) error {
 	return z.OtherError{Msg: fmt.Sprintf("player cant leave for continue game...")}
 }
 
-func (t *Table) Join(s *session.Session, tableId string) error {
+func (t *QuickTable) Join(s *session.Session, tableId string) error {
 	if err := models.SetTableId(s.UID(), tableId); err != nil {
 		return err
 	}
 	return t.group.Add(s)
 }
 
-func (t *Table) GetInfo() *proto.TableInfo {
+func (t *QuickTable) GetInfo() *proto.TableInfo {
 	players := make(map[int64]*proto.TableInfo_Player, 0)
 	for k, v := range t.clients {
 		players[k] = v.GetPlayer()
@@ -374,11 +374,11 @@ func (t *Table) GetInfo() *proto.TableInfo {
 	}
 }
 
-func (t *Table) GetTableId() string {
+func (t *QuickTable) GetTableId() string {
 	return t.tableId
 }
 
-func (t *Table) ResumeTable(s *session.Session, msg *proto.ResumeTable) error {
+func (t *QuickTable) ResumeTable(s *session.Session, msg *proto.ResumeTable) error {
 	t.group.Add(s)
 	t.res[s.UID()] = 0
 	c := t.Entity(s.UID())

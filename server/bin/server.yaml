@@ -56,7 +56,7 @@ rooms:
     tableType: 1
     prefab: Game2v2
 
-  - roomId: '5'
+  - roomId: '5-1'
     pvp: 3
     divide: 1
     name: top3争夺第一

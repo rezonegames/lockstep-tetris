@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type NormalWaiter struct {
+type QuickWaiter struct {
 	uiid        string
 	group       *nano.Group
 	readys      map[int64]int64
@@ -25,9 +25,9 @@ type NormalWaiter struct {
 }
 
 // NewWaiter返回错误代表有人下线了
-func NewNormalWaiter(sList []*session.Session, room util.RoomEntity, table util.TableEntity) *NormalWaiter {
+func NewQuickWaiter(sList []*session.Session, room util.RoomEntity, table util.TableEntity) *QuickWaiter {
 	uiid := uuid.New().String()
-	w := &NormalWaiter{
+	w := &QuickWaiter{
 		uiid:      uiid,
 		group:     nano.NewGroup(uiid),
 		room:      room,
@@ -43,7 +43,7 @@ func NewNormalWaiter(sList []*session.Session, room util.RoomEntity, table util.
 	return w
 }
 
-func (w *NormalWaiter) AfterInit() {
+func (w *QuickWaiter) AfterInit() {
 	w.stime = scheduler.NewCountTimer(time.Second, int(w.countDown), func() {
 		w.timeCounter++
 		// 都准备好了或者又离开的，解散waiter
@@ -52,7 +52,7 @@ func (w *NormalWaiter) AfterInit() {
 }
 
 // Dismiss 解散
-func (w *NormalWaiter) CheckAndDismiss() {
+func (w *QuickWaiter) CheckAndDismiss() {
 	// 中途有离开或者10秒倒计时有玩家没有准备，返回到队列
 	//log.Debug("CheckAndDismiss %d %d", len(w.readys), w.group.Count())
 	hasLeave := w.group.Count() != len(w.sList)
@@ -90,7 +90,7 @@ func (w *NormalWaiter) CheckAndDismiss() {
 
 //
 // 返回等待信息
-func (w *NormalWaiter) GetInfo() *proto.TableInfo_Waiter {
+func (w *QuickWaiter) GetInfo() *proto.TableInfo_Waiter {
 	return &proto.TableInfo_Waiter{
 		Readys:    w.readys,
 		CountDown: w.countDown - w.timeCounter,
@@ -99,7 +99,7 @@ func (w *NormalWaiter) GetInfo() *proto.TableInfo_Waiter {
 
 //
 // Ready 准备
-func (w *NormalWaiter) Ready(s *session.Session) error {
+func (w *QuickWaiter) Ready(s *session.Session) error {
 	uid := s.UID()
 	if _, ok := w.readys[uid]; ok {
 		return s.Response(&proto.ReadyResp{Code: proto.ErrorCode_OK})
@@ -109,7 +109,7 @@ func (w *NormalWaiter) Ready(s *session.Session) error {
 	return s.Response(&proto.ReadyResp{Code: proto.ErrorCode_OK})
 }
 
-func (w *NormalWaiter) Leave(s *session.Session) error {
+func (w *QuickWaiter) Leave(s *session.Session) error {
 	delete(w.readys, s.UID())
 	return w.group.Leave(s)
 }
