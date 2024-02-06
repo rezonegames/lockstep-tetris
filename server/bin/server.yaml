@@ -1,0 +1,70 @@
+---
+appName: tetris
+isDebug: true
+tokenExpireTime: 15552000000
+appSecret: foobar
+tokenSecret: 04b118d988109e59b84021904f4ec0ccf3a9f89b41309917b893a8e9ea0bed16
+serverPort: ":8000"
+addr: ":23456"
+enableChecksum: true
+
+# redis
+redis:
+  host: 127.0.0.1:6379
+  db: 4
+
+# mongo
+mongo:
+  uri: mongodb://localhost:27017
+  db: tetris
+
+# 房间配置
+rooms:
+  - roomId: '1'
+    pvp: 2
+    divide: 1
+    name: 1v1PK
+    minCoin: 1
+    roomType: 1
+    tableType: 1
+    prefab: Game1v1
+
+  - roomId: '2'
+    pvp: 6
+    divide: 3
+    name: 3v3两队
+    minCoin: 10
+    roomType: 1
+    tableType: 1
+    prefab: Game3v3
+
+  - roomId: '3'
+    pvp: 6
+    divide: 1
+    name: top6选出最牛
+    minCoin: 5
+    roomType: 1
+    tableType: 1
+    prefab: GameTop6
+
+  - roomId: '4'
+    pvp: 6
+    divide: 2
+    name: 2v2三队
+    minCoin: 5
+    roomType: 1
+    tableType: 1
+    prefab: Game2v2
+
+  - roomId: '5'
+    pvp: 3
+    divide: 1
+    name: top3争夺第一
+    minCoin: 5
+    roomType: 1
+    tableType: 1
+    prefab: GameTop3
+
+# gm白名单
+gmIps: [ ]
+version: 3.0.0

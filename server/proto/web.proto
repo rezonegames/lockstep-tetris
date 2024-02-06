@@ -1,0 +1,17 @@
+syntax = "proto3";
+package proto;
+option go_package = "/proto";
+import "error.proto";
+import "consts.proto";
+
+message AccountLoginReq {
+  AccountType partition = 1;
+  string accountId = 2;
+}
+
+message AccountLoginResp {
+  ErrorCode code = 5;
+  int64 userId = 1;
+  string addr = 2;
+  string name = 3;
+}

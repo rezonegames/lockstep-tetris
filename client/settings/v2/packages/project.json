@@ -1,0 +1,32 @@
+{
+  "__version__": "1.0.4",
+  "layer": [
+    {
+      "name": "default",
+      "value": 1
+    }
+  ],
+  "fbx": {
+    "legacyFbxImporter": {
+      "visible": true
+    }
+  },
+  "general": {
+    "designResolution": {
+      "fitHeight": false,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "sorting-layer": {
+    "layers": [
+      {
+        "id": 0,
+        "name": "default",
+        "value": 0
+      }
+    ],
+    "increaseId": 3
+  },
+  "custom_joint_texture_layouts": []
+}
