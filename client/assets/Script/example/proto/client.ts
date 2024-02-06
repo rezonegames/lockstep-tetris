@@ -44,7 +44,7 @@ export interface RegisterGameReq {
 
 export interface Room {
   roomId: string;
-  seatCount: number;
+  pvp: number;
   name: string;
   minCoin: number;
   prefab: string;
@@ -532,7 +532,7 @@ export const RegisterGameReq = {
 };
 
 function createBaseRoom(): Room {
-  return { roomId: "", seatCount: 0, name: "", minCoin: 0, prefab: "" };
+  return { roomId: "", pvp: 0, name: "", minCoin: 0, prefab: "" };
 }
 
 export const Room = {
@@ -540,8 +540,8 @@ export const Room = {
     if (message.roomId !== "") {
       writer.uint32(10).string(message.roomId);
     }
-    if (message.seatCount !== 0) {
-      writer.uint32(16).int32(message.seatCount);
+    if (message.pvp !== 0) {
+      writer.uint32(16).int32(message.pvp);
     }
     if (message.name !== "") {
       writer.uint32(26).string(message.name);
@@ -574,7 +574,7 @@ export const Room = {
             break;
           }
 
-          message.seatCount = reader.int32();
+          message.pvp = reader.int32();
           continue;
         case 3:
           if (tag !== 26) {

@@ -1,0 +1,3 @@
+[submodule "mynano"]
+	path = mynano
+	url = git@my-git:rezonegames/nano.git
