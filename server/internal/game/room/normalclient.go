@@ -11,13 +11,14 @@ import (
 
 type NormalClient struct {
 	player       *proto.TableInfo_Player
-	cs           *session.Session
+	s            *session.Session
 	lastUpdateAt time.Time
 	table        util.TableEntity
 	frames       map[int64][]*proto.Action
 	lock         sync.RWMutex //锁，用于存帧
 	lastFrameId  int64        // 当前客户端到了哪帧
 	speed        int64
+	resProgress  int32
 }
 
 func NewNormalClient(s *session.Session, teamId int32, table util.TableEntity) *NormalClient {
@@ -28,7 +29,7 @@ func NewNormalClient(s *session.Session, teamId int32, table util.TableEntity) *
 			End:     false,
 			Profile: util.ConvProfileToProtoProfile(p),
 		},
-		cs: s,
+		s: s,
 		//updatedAt: z.GetTime(),
 		table:  table,
 		frames: make(map[int64][]*proto.Action, 0),
@@ -75,14 +76,24 @@ func (c *NormalClient) GetFrame(frameId int64) []*proto.Action {
 }
 
 func (c *NormalClient) GetSession() *session.Session {
-	return c.cs
+	return c.s
 }
 
-func (c *NormalClient) SetSession(s *session.Session) {
-	c.cs = s
+func (c *NormalClient) Reconnect(s *session.Session, frameId int64) {
+	c.s = s
+	c.resProgress = 0
+	c.lastFrameId = frameId
 }
 
-func (c *NormalClient) GetId() int64 {
+func (c *NormalClient) SetResProgress(progress int32) {
+	c.resProgress = progress
+}
+
+func (c *NormalClient) GetResProgress() int32 {
+	return c.resProgress
+}
+
+func (c *NormalClient) GetUserId() int64 {
 	return c.player.Profile.UserId
 }
 
@@ -94,6 +105,6 @@ func (c *NormalClient) GetTeamId() int32 {
 	return c.player.TeamId
 }
 
-func (c *NormalClient) IsEnd() bool {
+func (c *NormalClient) IsGameOver() bool {
 	return c.player.End
 }

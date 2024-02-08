@@ -103,11 +103,11 @@ export default class UIControl extends UIView {
                 // 保存每个tetris对象
                 this.tetrisManager[uid] = tetris;
             }
-            this.resProgress();
+            this.notifyResProgress();
         });
     }
 
-    resProgress() {
+    notifyResProgress() {
         oo.log.logView("", "res.ok");
         let buf = LoadRes.encode({current: 100}).finish();
         channel.gameNotify("r.loadres", buf);

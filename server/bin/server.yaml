@@ -26,44 +26,47 @@ rooms:
     name: 1v1PK
     minCoin: 1
     roomType: 1
-    tableType: 1
     prefab: Game1v1
 
-  - roomId: '2-1'
-    pvp: 6
-    divide: 3
-    name: 3v3两队
-    minCoin: 10
-    roomType: 1
-    tableType: 1
-    prefab: Game3v3
-
-  - roomId: '3-1'
-    pvp: 6
+  - roomId: '1-2'
+    pvp: 2
     divide: 1
-    name: top6选出最牛
-    minCoin: 5
-    roomType: 1
-    tableType: 1
-    prefab: GameTop6
+    name: 1v1PK自建桌
+    minCoin: 1
+    roomType: 2
+    prefab: Game1v1
 
-  - roomId: '4-1'
-    pvp: 6
-    divide: 2
-    name: 2v2三队
-    minCoin: 5
-    roomType: 1
-    tableType: 1
-    prefab: Game2v2
-
-  - roomId: '5-1'
-    pvp: 3
-    divide: 1
-    name: top3争夺第一
-    minCoin: 5
-    roomType: 1
-    tableType: 1
-    prefab: GameTop3
+#  - roomId: '2-1'
+#    pvp: 6
+#    divide: 3
+#    name: 3v3两队
+#    minCoin: 10
+#    roomType: 1
+#    prefab: Game3v3
+#
+#  - roomId: '3-1'
+#    pvp: 6
+#    divide: 1
+#    name: top6选出最牛
+#    minCoin: 5
+#    roomType: 1
+#    prefab: GameTop6
+#
+#  - roomId: '4-1'
+#    pvp: 6
+#    divide: 2
+#    name: 2v2三队
+#    minCoin: 5
+#    roomType: 1
+#    prefab: Game2v2
+#
+#  - roomId: '5-1'
+#    pvp: 3
+#    divide: 1
+#    name: top3争夺第一
+#    minCoin: 5
+#    roomType: 1
+#    prefab: GameTop3
 
 # gm白名单
 gmIps: [ ]

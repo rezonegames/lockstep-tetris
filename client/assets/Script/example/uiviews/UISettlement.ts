@@ -52,11 +52,11 @@ export default class UISettlement extends UIView {
     }
 
     public onClose() {
-        channel.gameReqest("r.leave", Leave.encode({roomId: "", force: false}).finish(), {
+        channel.gameReqest("r.leave", Leave.encode({roomId: ""}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = LeaveResp.decode(new Uint8Array(data.body));
-                uiManager.replace(UIID.UIHall, resp.roomList);
+                uiManager.replace(UIID.UIHall);
             }
         });
     }

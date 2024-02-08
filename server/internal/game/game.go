@@ -9,6 +9,7 @@ import (
 	"tetris/config"
 	"tetris/internal/game/room"
 	service2 "tetris/internal/game/service"
+	"tetris/internal/game/util"
 	"tetris/pkg/log"
 	"time"
 )
@@ -41,7 +42,7 @@ func StartUp() {
 			}),
 		}
 		for _, v := range sc.Rooms {
-			r := room.NewRoom(v)
+			r := room.NewRoom(&util.RoomOption{Config: v})
 			service.AddRoomEntity(v.RoomId, r)
 		}
 		services.Register(service, opts...)

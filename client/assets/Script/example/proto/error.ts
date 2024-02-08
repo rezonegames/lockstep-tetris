@@ -13,5 +13,6 @@ export enum ErrorCode {
   TableDismissError = 6,
   RoomDismissError = 7,
   JoinError = 8,
+  LeaveError = 9,
   UNRECOGNIZED = -1,
 }

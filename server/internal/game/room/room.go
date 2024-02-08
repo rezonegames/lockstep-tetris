@@ -3,8 +3,8 @@ package room
 import (
 	"fmt"
 	"github.com/lonng/nano/session"
-	"tetris/config"
 	"tetris/internal/game/util"
+	"tetris/pkg/log"
 	"tetris/proto/proto"
 )
 
@@ -30,28 +30,52 @@ func NewWaiter(sList []*session.Session, room util.RoomEntity, table util.TableE
 }
 
 // NewTable 根据桌子类型创建道具桌还是正常桌
-func NewTable(room util.RoomEntity, ss []*session.Session) util.TableEntity {
-	conf := room.GetConfig()
-	var t util.TableEntity
-	switch conf.TableType {
-	case proto.TableType_NORMAL:
-		t = NewQuickTable(room, ss)
+func NewTable(opt *util.TableOption) util.TableEntity {
+
+	var (
+		conf = opt.Room.GetConfig()
+		t    util.TableEntity
+	)
+
+	switch conf.RoomType {
+	case proto.RoomType_QUICK:
+		t = NewQuickTable(opt)
+		break
+
+	case proto.RoomType_FRIEND:
+		t = NewFriendTable(opt)
+		break
+
 	default:
-		panic(fmt.Sprintf("NewTable unknown type %s", conf.TableType))
+		panic(fmt.Sprintf("NewTable unknown type %s", conf.RoomType))
 	}
 	t.AfterInit()
+
+	log.Info("table %s start", opt.CustomTableId)
 	return t
 }
 
 // NewRoom 根据房间类型创建房间
-func NewRoom(conf *config.Room) util.RoomEntity {
-	var r util.RoomEntity
+func NewRoom(opt *util.RoomOption) util.RoomEntity {
+	var (
+		conf = opt.Config
+		r    util.RoomEntity
+	)
+
 	switch conf.RoomType {
 	case proto.RoomType_QUICK:
-		r = NewQuickRoom(conf)
+		r = NewQuickRoom(opt)
+		break
+
+	case proto.RoomType_FRIEND:
+		r = NewFriendRoom(opt)
+		break
+
 	default:
 		panic(fmt.Sprintf("NewRoom unknown type %s", conf.RoomType))
 	}
+
+	log.Info(conf.Dump())
 	r.AfterInit()
 	return r
 }

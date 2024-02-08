@@ -32,16 +32,26 @@ type Mongo struct {
 }
 
 type Room struct {
-	RoomId    string          `yaml:"roomId"`
-	Pvp       int32           `yaml:"pvp"`
-	Divide    int32           `yaml:"divide"`
-	Name      string          `yaml:"name"`
-	MinCoin   int32           `yaml:"minCoin"`
-	RoomType  proto.RoomType  `yaml:"roomType"`
-	TableType proto.TableType `yaml:"tableType"`
-	Prefab    string          `yaml:"prefab"`
+	RoomId   string         `yaml:"roomId"`
+	Pvp      int32          `yaml:"pvp"`
+	Divide   int32          `yaml:"divide"`
+	Name     string         `yaml:"name"`
+	MinCoin  int32          `yaml:"minCoin"`
+	RoomType proto.RoomType `yaml:"roomType"`
+	Prefab   string         `yaml:"prefab"`
+}
+
+func (r *Room) Conv2Proto() *proto.Room {
+	return &proto.Room{
+		RoomId:    r.RoomId,
+		Pvp:       r.Pvp,
+		Name:      r.Name,
+		MinCoin:   r.MinCoin,
+		Prefab:    r.Prefab,
+		TableList: nil,
+	}
 }
 
 func (r *Room) Dump() string {
-	return fmt.Sprintf("roomId %s pvp:divide %d:%d roomType %d tableType %d", r.RoomId, r.Pvp, r.Divide, r.RoomType, r.TableType)
+	return fmt.Sprintf("roomId %s pvp:divide %d:%d roomType %d", r.RoomId, r.Pvp, r.Divide, r.RoomType)
 }

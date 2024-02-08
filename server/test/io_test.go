@@ -127,8 +127,12 @@ func client(deviceId, rid string) {
 	ticker := time.NewTicker(time.Duration(ra) * time.Second)
 	defer ticker.Stop()
 	bSendCheckRes := false
+
+	dida := 0
+
 	for {
 		select {
+
 		case <-chEnd:
 			fmt.Println("游戏结束了", uid)
 			c.Close()
@@ -139,19 +143,22 @@ func client(deviceId, rid string) {
 				c.Request("r.join", &proto2.Join{
 					RoomId: rid,
 				}, func(data interface{}) {
-					v := proto2.GameStateResp{}
+					v := proto2.JoinResp{}
 					ss.Unmarshal(data.([]byte), &v)
-					state = v.State
-					fmt.Println(deviceId, "join", state)
-					bSendCheckRes = false
+					if v.Code == proto2.ErrorCode_OK {
+						state = proto2.GameState_WAIT
+						bSendCheckRes = false
+						fmt.Println(deviceId, "join", state)
+
+					} else {
+						return
+					}
 				})
 			case proto2.GameState_INGAME:
 
 				switch tableState {
 				case proto2.TableState_WAITREADY:
-					c.Request("r.ready", &proto2.Ready{}, func(data interface{}) {
-						fmt.Println(deviceId, "ready")
-					})
+					c.Notify("r.ready", &proto2.Ready{})
 					break
 				case proto2.TableState_CHECK_RES:
 					if !bSendCheckRes {
@@ -160,9 +167,18 @@ func client(deviceId, rid string) {
 					}
 					break
 				case proto2.TableState_GAMING:
+
+					dida++
+					if dida == 3 {
+						c.Notify("r.update", &proto2.UpdateFrame{Action: &proto2.Action{
+							Key: proto2.ActionType_END,
+						}})
+					}
+
 					break
 				case proto2.TableState_SETTLEMENT:
 					state = proto2.GameState_IDLE
+					dida = 0
 					fmt.Println(deviceId, "round over")
 				}
 			}

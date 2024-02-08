@@ -3500,7 +3500,7 @@
       "__id__": 155
     },
     "quickClose": false,
-    "cache": false,
+    "cache": true,
     "showType": 2,
     "listView": {
       "__id__": 79

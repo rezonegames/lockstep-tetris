@@ -1,6 +1,7 @@
 package room
 
 import (
+	"fmt"
 	"github.com/lonng/nano"
 	"github.com/lonng/nano/session"
 	"sync"
@@ -20,17 +21,32 @@ type QuickRoom struct {
 	lock    sync.RWMutex
 	waitMap map[int64]int64
 	chParse chan bool
+	roomId  string
 }
 
-func NewQuickRoom(conf *config.Room) *QuickRoom {
+func (r *QuickRoom) GetInfo() *proto.Room {
+	var (
+		roomInfo = r.config.Conv2Proto()
+	)
+	roomInfo.PlayerCount = int32(r.group.Count())
+	return roomInfo
+}
+
+func NewQuickRoom(opt *util.RoomOption) *QuickRoom {
+	var (
+		conf   = opt.Config
+		roomId = conf.RoomId
+	)
+
 	r := &QuickRoom{
-		group:   nano.NewGroup(conf.RoomId),
+		roomId:  roomId,
+		group:   nano.NewGroup(roomId),
 		config:  conf,
 		tables:  make(map[string]util.TableEntity, 0),
 		waitMap: make(map[int64]int64, 0),
 		chParse: make(chan bool, 0),
 	}
-	log.Info(conf.Dump())
+
 	return r
 }
 
@@ -103,7 +119,15 @@ func (r *QuickRoom) GetConfig() *config.Room {
 
 // WaitReady 准备就绪后，进入确认界面，所有玩家都点击确认以后，才开始游戏
 func (r *QuickRoom) WaitReady(sList []*session.Session) {
-	r.CreateTable(sList)
+	var (
+		now = z.NowUnixMilli()
+	)
+	t := NewTable(&util.TableOption{
+		Room:          r,
+		SessionList:   sList,
+		CustomTableId: fmt.Sprintf("%s:%d", r.roomId, now),
+	})
+	r.tables[t.GetTableId()] = t
 }
 
 func (r *QuickRoom) BackToWait(sList []*session.Session) {
@@ -158,10 +182,4 @@ func (r *QuickRoom) Join(s *session.Session) error {
 func (r *QuickRoom) OnTableDeleted(tableId string) {
 	log.Info("room %s delete table %s", r.config.RoomId, tableId)
 	delete(r.tables, tableId)
-}
-
-// CreateTable waiter或者其它的方式创建的房间
-func (r *QuickRoom) CreateTable(sList []*session.Session) {
-	t := NewTable(r, sList)
-	r.tables[t.GetTableId()] = t
 }

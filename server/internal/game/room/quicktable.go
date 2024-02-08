@@ -34,13 +34,17 @@ type QuickTable struct {
 	randSeed      int64
 	pieceList     []int32
 	resCountDown  int32 // 检查资源是否加载成功
-	res           map[int64]int32
 }
 
-func NewQuickTable(room util.RoomEntity, sList []*session.Session) *QuickTable {
-	conf := room.GetConfig()
-	now := z.NowUnixMilli()
-	tableId := fmt.Sprintf("%s:%d", conf.RoomId, now)
+func NewQuickTable(opt *util.TableOption) *QuickTable {
+	var (
+		room    = opt.Room
+		conf    = room.GetConfig()
+		now     = z.NowUnixMilli()
+		tableId = opt.CustomTableId
+		sList   = opt.SessionList
+	)
+
 	t := &QuickTable{
 		group:         nano.NewGroup(tableId),
 		tableId:       tableId,
@@ -54,7 +58,6 @@ func NewQuickTable(room util.RoomEntity, sList []*session.Session) *QuickTable {
 		resCountDown:  100,
 		randSeed:      now,
 		pieceList:     make([]int32, 0),
-		res:           make(map[int64]int32, 0),
 		frameTimes:    make(map[int64]int64, 0),
 	}
 
@@ -76,8 +79,6 @@ func NewQuickTable(room util.RoomEntity, sList []*session.Session) *QuickTable {
 	}
 
 	t.waiter = NewWaiter(sList, room, t)
-
-	log.Info("table %s start", tableId)
 	return t
 }
 
@@ -124,9 +125,8 @@ func (t *QuickTable) Run() {
 			switch t.state {
 			case proto.TableState_CHECK_RES:
 				b := true
-				for id, _ := range t.clients {
-					if t.res[id] != 100 {
-						//log.Info("check res not ok %d", id)
+				for _, v := range t.clients {
+					if v.GetResProgress() != 100 {
 						b = false
 					}
 				}
@@ -143,7 +143,7 @@ func (t *QuickTable) Run() {
 				t.frameTimes[t.nextFrameId] = z.NowUnixMilli()
 				for _, v := range t.clients {
 					// 检查资源，如果资源没加载完，不发送游戏中的帧数据
-					if t.res[v.GetId()] != 100 {
+					if v.GetResProgress() != 100 {
 						continue
 					}
 
@@ -165,7 +165,7 @@ func (t *QuickTable) Run() {
 							for _, v := range t.clients {
 								if al := v.GetFrame(i); len(al) > 0 {
 									frame.PlayerList = append(frame.PlayerList, &proto.OnFrame_Player{
-										UserId:     v.GetId(),
+										UserId:     v.GetUserId(),
 										ActionList: al,
 									})
 								}
@@ -189,18 +189,25 @@ func (t *QuickTable) Run() {
 
 func (t *QuickTable) ChangeState(state proto.TableState) {
 	t.state = state
-	var roomList []*proto.Room
 	tableInfo := t.GetInfo()
 	switch state {
 	case proto.TableState_CHECK_RES:
+
+		var (
+			players = make(map[int64]int32, 0)
+		)
+
+		for k, v := range t.clients {
+			players[k] = v.GetResProgress()
+		}
+
 		tableInfo.Res = &proto.TableInfo_Res{
-			Players:   t.res,
+			Players:   players,
 			CountDown: t.resCountDown,
 		}
 		break
 
 	case proto.TableState_SETTLEMENT:
-		roomList = util.GetRoomList()
 		playerItems := make(map[int64]*proto.OnItemChange, 0)
 		itemList := make([]*proto.Item, 0)
 		itemList = append(itemList, &proto.Item{
@@ -233,7 +240,6 @@ func (t *QuickTable) ChangeState(state proto.TableState) {
 	t.group.Broadcast("onState", &proto.GameStateResp{
 		State:     proto.GameState_INGAME,
 		TableInfo: tableInfo,
-		RoomList:  roomList,
 	})
 }
 
@@ -250,7 +256,13 @@ func (t *QuickTable) Ready(s *session.Session) error {
 }
 
 func (t *QuickTable) LoadRes(s *session.Session, msg *proto.LoadRes) error {
-	t.res[s.UID()] = msg.Current
+	var (
+		uid      = s.UID()
+		client   = t.Entity(uid)
+		progress = msg.Current
+	)
+
+	client.SetResProgress(progress)
 	log.Info("LoadRes down %d", s.UID())
 	return nil
 }
@@ -268,19 +280,19 @@ func (t *QuickTable) Update(s *session.Session, msg *proto.UpdateFrame) error {
 	}
 
 	c := t.Entity(uid)
-	if c.IsEnd() {
+	if c.IsGameOver() {
 		return nil
 	}
 	c.SaveFrame(t.nextFrameId, msg)
 
 	// 如果已经结束了，判断输赢
-	if c.IsEnd() {
+	if c.IsGameOver() {
 		isTeamLose := true
 		var loseCount int32
 		teamId := c.GetTeamId()
 		for _, v := range t.clients {
 			if v.GetTeamId() == teamId {
-				if !v.IsEnd() {
+				if !v.IsGameOver() {
 					isTeamLose = false
 				}
 			}
@@ -379,14 +391,15 @@ func (t *QuickTable) GetTableId() string {
 }
 
 func (t *QuickTable) ResumeTable(s *session.Session, msg *proto.ResumeTable) error {
-	t.group.Add(s)
-	t.res[s.UID()] = 0
-	c := t.Entity(s.UID())
-	c.SetLastFrame(msg.FrameId)
-	c.SetSession(s)
-	return s.Response(&proto.GameStateResp{
-		Code:      proto.ErrorCode_OK,
-		State:     proto.GameState_INGAME,
-		TableInfo: t.GetInfo(),
-	})
+	var (
+		uid         = s.UID()
+		lastFrameId = msg.FrameId
+	)
+	err := t.group.Add(s)
+	if err != nil {
+		return err
+	}
+	client := t.Entity(uid)
+	client.Reconnect(s, lastFrameId)
+	return nil
 }

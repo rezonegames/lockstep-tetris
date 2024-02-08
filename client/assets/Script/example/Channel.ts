@@ -11,11 +11,10 @@ import {NetNode} from "db://assets/Script/core/network/NetNode";
 import {oo} from "db://assets/Script/core/oo";
 import {
     GameStateResp,
-    LoadRes,
     LoginToGame,
     LoginToGameResp,
-    OnFrameList, ResumeRoom,
-    ResumeTable
+    OnFrameList,
+    ResumeTable, ResumeTableResp
 } from "db://assets/Script/example/proto/client";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {Message} from "db://assets/Script/example/nano/message";
@@ -83,6 +82,7 @@ const route2cmd = (route: string): number => {
     let v: any = {
         "onState": 100,
         "onFrame": 101,
+        "onItemChange": 102,
     }
     return v[route];
 };
@@ -176,17 +176,13 @@ class NetNodeGame extends NetNode {
                         this.isReconnecting = false;
                     }
                     oo.event.raiseEvent("onUserInfo", resp.profile);
-                    // 如果tableId不为空，resumeTable，进入游戏
+
                     if (resp.tableId != "") {
+                        // 如果tableId不为空，resumeTable，进入游戏
                         this.resumeTable();
                         return;
                     }
-                    if(resp.roomId != "") {
-                        this.resumeRoom();
-                        return;
-                    }
-                    //
-                    uiManager.replace(UIID.UIHall, resp.roomList);
+                    uiManager.replace(UIID.UIHall);
                 } else {
                     oo.log.logNet(resp, "登录失败");
                 }
@@ -195,48 +191,28 @@ class NetNodeGame extends NetNode {
         this.request1("g.login", buf, rspObject);
     }
 
-    resumeRoom() {
-        let buf = ResumeRoom.encode({}).finish();
-        let rspObject: CallbackObject = {
-            target: this,
-            callback: (cmd: number, data: any) => {
-                let resp = GameStateResp.decode(new Uint8Array(data.body));
-                switch (resp.code) {
-                    case ErrorCode.OK:
-                        uiManager.replace(UIID.UIHall, resp.roomList);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        this.request1("r.resumeroom", buf, rspObject);
-    }
-
     resumeTable() {
-        let frameId = 0;
         let control = uiManager.getUI(UIID.UIControl) as UIControl;
-        if(control) {
-            frameId = control.curFrame;
-        }
+        let frameId = control ? control.curFrame : 0;
 
         let buf = ResumeTable.encode({frameId:frameId}).finish();
         let rspObject: CallbackObject = {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = GameStateResp.decode(new Uint8Array(data.body));
+                let resp = ResumeTableResp.decode(new Uint8Array(data.body));
 
                 switch (resp.code) {
                     case ErrorCode.TableDismissError:
-                        uiManager.replace(UIID.UIHall, resp.roomList);
+                        // 如果桌子已经解散了，退回到大厅
+                        uiManager.replace(UIID.UIHall);
                         break;
                     case ErrorCode.OK:
+                        // 恢复成功，重进游戏
+                        let state = resp.state;
                         if(!control) {
-                            uiManager.replace(UIID.UIControl, resp.tableInfo);
+                            uiManager.replace(UIID.UIControl, state.tableInfo);
                         } else {
-                            // 网络不稳定，直接res ok
-                            let buf = LoadRes.encode({current: 100}).finish();
-                            channel.gameNotify("r.loadres", buf);
+                            control.notifyResProgress();
                         }
                         break;
                     default:
@@ -266,12 +242,10 @@ class NetNodeGame extends NetNode {
                 break;
             case Package.TYPE_DATA:
                 let msg = Message.decode(p.body);
-                // oo.log.logNet(msg, "TYPE_DATA");
                 super.onMessage(msg);
                 break;
             case Package.TYPE_HEARTBEAT:
                 let msg1 = Message.decode(p.body);
-                // oo.log.logNet("", "心跳");
                 super.onMessage(msg1);
                 this.send(this._protocolHelper!.getHearbeat());
                 break;

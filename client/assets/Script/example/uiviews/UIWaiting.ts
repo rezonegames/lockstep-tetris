@@ -17,16 +17,6 @@ import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {channel} from "db://assets/Script/example/Channel";
 import {GameState, TableState} from "db://assets/Script/example/proto/consts";
 
-// Learn TypeScript:
-//  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/typescript.html
-// Learn Attribute:
-//  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/reference/attributes.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/reference/attributes.html
-// Learn life-cycle callbacks:
-//  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
-//  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
-
 const {ccclass, property} = _decorator;
 
 @ccclass
@@ -52,6 +42,7 @@ export default class UIWaiting extends UIView {
 
 
     public onOpen(fromUI: number, ...args: any): void {
+        super.onOpen(fromUI, ...args);
         oo.event.addEventListener("onState", this.onState, this);
         let room = args[0] as Room;
         this.title.string = `房间信息：名字：${room.name} 房间ID：${room.roomId}`;
@@ -140,20 +131,11 @@ export default class UIWaiting extends UIView {
 
     onReady() {
         let buf = Ready.encode({}).finish();
-        let respObject: CallbackObject = {
-            target: this,
-            callback: (cmd: number, data: any) => {
-                let resp = ReadyResp.decode(new Uint8Array(data.body));
-                oo.log.logNet(resp, "ready返回");
-                if (resp.code == ErrorCode.OK) {
-                }
-            }
-        }
-        channel.gameReqest("r.ready", buf, respObject);
+        channel.gameNotify("r.ready", buf);
     }
 
     onCancel() {
-        let buf = Leave.encode({roomId: "", force: false}).finish();
+        let buf = Leave.encode({roomId: ""}).finish();
         let respObject: CallbackObject = {
             target: this,
             callback: (cmd: number, data: any) => {

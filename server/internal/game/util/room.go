@@ -6,18 +6,26 @@ import (
 	"tetris/proto/proto"
 )
 
+type RoomOption struct {
+	Config *config.Room
+}
 type RoomEntity interface {
 	AfterInit()
 	BeforeShutdown()
 	Leave(s *session.Session) error
 	Join(s *session.Session) error
 	GetConfig() *config.Room
-	CreateTable(sList []*session.Session)
 	OnTableDeleted(tableId string)
 	BackToWait(sList []*session.Session)
 	Entity(tableId string) (TableEntity, error)
+	GetInfo() *proto.Room
 }
 
+type TableOption struct {
+	Room          RoomEntity
+	CustomTableId string
+	SessionList   []*session.Session
+}
 type TableEntity interface {
 	AfterInit()
 	GetTableId() string
@@ -47,10 +55,12 @@ type WaiterEntity interface {
 type ClientEntity interface {
 	GetPlayer() *proto.TableInfo_Player
 	GetSession() *session.Session
-	SetSession(s *session.Session)
-	GetId() int64
+	GetResProgress() int32
+	Reconnect(s *session.Session, lastFrameId int64)
+	SetResProgress(progress int32)
+	GetUserId() int64
 	GetTeamId() int32
-	IsEnd() bool
+	IsGameOver() bool
 
 	// 帧相关的数据
 	SaveFrame(frameId int64, msg *proto.UpdateFrame)

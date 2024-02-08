@@ -36,14 +36,8 @@ export enum TableState {
 export enum RoomType {
   ROOMTYPE_NONE = 0,
   QUICK = 1,
-  MATCH = 2,
-  UNRECOGNIZED = -1,
-}
-
-export enum TableType {
-  TABLETYPE_NONE = 0,
-  NORMAL = 1,
-  HAPPY = 2,
+  FRIEND = 2,
+  MATCH = 3,
   UNRECOGNIZED = -1,
 }
 

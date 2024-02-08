@@ -101,12 +101,9 @@ func (w *QuickWaiter) GetInfo() *proto.TableInfo_Waiter {
 // Ready 准备
 func (w *QuickWaiter) Ready(s *session.Session) error {
 	uid := s.UID()
-	if _, ok := w.readys[uid]; ok {
-		return s.Response(&proto.ReadyResp{Code: proto.ErrorCode_OK})
-	}
 	w.readys[uid] = z.NowUnix()
 	w.table.ChangeState(proto.TableState_WAITREADY)
-	return s.Response(&proto.ReadyResp{Code: proto.ErrorCode_OK})
+	return nil
 }
 
 func (w *QuickWaiter) Leave(s *session.Session) error {

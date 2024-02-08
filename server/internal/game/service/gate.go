@@ -7,7 +7,6 @@ import (
 	"tetris/internal/game/util"
 	"tetris/models"
 	"tetris/pkg/log"
-	"tetris/pkg/z"
 	"tetris/proto/proto"
 )
 
@@ -36,7 +35,6 @@ func (g *GateService) offline(s *session.Session) error {
 }
 
 func (g *GateService) online(s *session.Session, uid int64) (*models.Profile, error) {
-
 	if ps, err := g.group.Member(uid); err == nil {
 		log.Info("close old connect %d", ps.UID())
 		g.group.Leave(ps)
@@ -53,7 +51,11 @@ func (g *GateService) online(s *session.Session, uid int64) (*models.Profile, er
 }
 
 func (g *GateService) Register(s *session.Session, msg *proto.RegisterGameReq) error {
-	if msg.AccountId == "" {
+	var (
+		accountId = msg.AccountId
+	)
+
+	if accountId == "" {
 		return s.Response(proto.LoginToGameResp{
 			Code: proto.ErrorCode_AccountIdError,
 		})
@@ -70,32 +72,27 @@ func (g *GateService) Register(s *session.Session, msg *proto.RegisterGameReq) e
 	return g.Login(s, &proto.LoginToGame{UserId: p.UserId})
 }
 
-func (g *GateService) Login(s *session.Session, req *proto.LoginToGame) error {
-	uid := req.UserId
+func (g *GateService) Login(s *session.Session, msg *proto.LoginToGame) error {
+	var (
+		uid             = msg.UserId
+		roomId, tableId string
+	)
+
 	p, err := g.online(s, uid)
 	if err != nil {
 		return err
 	}
 	// 返回所在的房间号和桌子号
-	var roomId, tableId string
-	if rs, err := models.GetRoundSession(uid); err == nil {
+	rs, err := models.GetRoundSession(uid)
+	if err == nil {
 		roomId = rs.RoomId
 		tableId = rs.TableId
 	}
 
 	return s.Response(&proto.LoginToGameResp{
-		Code:     proto.ErrorCode_OK,
-		Profile:  util.ConvProfileToProtoProfile(p),
-		RoomList: util.GetRoomList(),
-		RoomId:   roomId,
-		TableId:  tableId,
+		Code:    proto.ErrorCode_OK,
+		Profile: util.ConvProfileToProtoProfile(p),
+		RoomId:  roomId,
+		TableId: tableId,
 	})
-}
-
-func (g *GateService) Rooms(s *session.Session, _ interface{}) error {
-	return s.Response(&proto.GetRoomListResp{RoomList: util.GetRoomList()})
-}
-
-func (g *GateService) Ping(s *session.Session, _ *proto.Ping) error {
-	return s.Response(&proto.Pong{Ts: z.NowUnixMilli()})
 }

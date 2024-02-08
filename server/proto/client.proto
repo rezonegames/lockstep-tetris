@@ -4,18 +4,6 @@ import "consts.proto";
 package proto;
 option go_package = "/proto";
 
-message Ping {
-}
-
-message Pong {
-  int64 ts = 1;
-}
-
-message LoginToGame {
-  int64 userId = 1;
-}
-
-
 message Item {
   ItemType key = 1;
   int32 val = 2;
@@ -26,114 +14,6 @@ message Profile {
   int64 userId = 2;
   repeated Item itemList = 3;
   int64 updatedAt = 10;
-}
-message LoginToGameResp {
-  ErrorCode code = 1;
-  Profile profile = 2;
-  repeated Room roomList = 3;
-  string roomId = 4;
-  string tableId = 5;
-}
-
-message RegisterGameReq {
-  string name = 1;
-  string accountId = 2;
-}
-
-message Room {
-  string roomId = 1;
-  int32 pvp = 2;
-  string name = 3;
-  int32 minCoin = 4;
-  string prefab = 5;
-}
-
-message GetRoomListResp {
-  ErrorCode code = 1;
-  repeated Room roomList = 2;
-}
-
-message Join {
-  string roomId = 1;
-}
-
-message JoinResp {
-  ErrorCode code = 1;
-}
-
-message Leave {
-  string roomId = 1;
-  bool force = 2;
-}
-
-message LeaveResp {
-  ErrorCode code = 1;
-  repeated Room roomList = 2;
-}
-
-message Ready {
-}
-
-message ReadyResp {
-  ErrorCode code = 1;
-}
-
-
-message LoadRes {
-  int32 current = 1;
-}
-
-message LoadResResp {
-  ErrorCode code = 1;
-}
-
-message ResumeTable {
-  int64 frameId = 1;
-}
-
-message ResumeRoom {
-
-}
-
-// 在每一个步骤，下发游戏状态
-message GameStateResp {
-  ErrorCode code = 1;
-  string errMsg = 2;
-  GameState state = 3;
-  TableInfo tableInfo = 5;
-  repeated Room roomList = 6;
-  string roomId = 7;
-}
-
-
-message Action {
-  ActionType key = 1;
-  repeated int32 valList = 2;
-
-  int64 to = 3;
-  int64 from = 4;
-}
-
-message UpdateFrame {
-  Action action = 1;
-}
-
-message OnFrame {
-  message Player {
-    int64 userId = 1;
-    repeated Action actionList = 2;
-  }
-
-  int64 frameId = 1;
-  int64 frameTime = 2;
-
-  repeated Player playerList = 3;
-  // 只有第一帧的时候返回500个
-  repeated int32 pieceList = 4;
-}
-
-message OnFrameList {
-  repeated OnFrame frameList = 1;
 }
 
 // 下发桌子信息
@@ -172,9 +52,120 @@ message TableInfo {
   map<int64, OnItemChange> playerItems = 9;
 }
 
+message Room {
+  string roomId = 1;
+  int32 pvp = 2;
+  string name = 3;
+  int32 minCoin = 4;
+  string prefab = 5;
+
+  repeated TableInfo tableList = 6;
+  int32 playerCount = 7;
+}
+
+message Action {
+  ActionType key = 1;
+  repeated int32 valList = 2;
+
+  int64 to = 3;
+  int64 from = 4;
+}
+
+message LoginToGame {
+  int64 userId = 1;
+}
+
+message LoginToGameResp {
+  ErrorCode code = 1;
+  Profile profile = 2;
+  string roomId = 4;
+  string tableId = 5;
+}
+
+message RegisterGameReq {
+  string name = 1;
+  string accountId = 2;
+}
+
+message GetRoomList {
+
+}
+
+message GetRoomListResp {
+  ErrorCode code = 1;
+  repeated Room roomList = 2;
+}
+
+message Join {
+  string roomId = 1;
+}
+
+message JoinResp {
+  ErrorCode code = 1;
+  Room roomInfo = 2;
+}
+
+message Leave {
+  string roomId = 1;
+}
+
+message LeaveResp {
+  ErrorCode code = 1;
+}
+
+message Ready {
+}
+
+message ReadyResp {
+  ErrorCode code = 1;
+}
+
+message LoadRes {
+  int32 current = 1;
+}
+
+message ResumeTable {
+  int64 frameId = 1;
+}
+
+message ResumeTableResp {
+  ErrorCode code = 1;
+  GameStateResp state = 2;
+}
+
+// 在每一个步骤，下发游戏状态
+message GameStateResp {
+  ErrorCode code = 1;
+  GameState state = 3;
+  TableInfo tableInfo = 5;
+}
+
+
+message UpdateFrame {
+  Action action = 1;
+}
+
+message OnFrame {
+  message Player {
+    int64 userId = 1;
+    repeated Action actionList = 2;
+  }
+
+  int64 frameId = 1;
+  int64 frameTime = 2;
+
+  repeated Player playerList = 3;
+  // 只有第一帧的时候返回500个
+  repeated int32 pieceList = 4;
+}
+
+message OnFrameList {
+  repeated OnFrame frameList = 1;
+}
+
 // 道具变化
 message OnItemChange {
   repeated Item itemList = 1;
   string reason = 2;
-  int64 To = 3;
+  int64 to = 3;
 }

@@ -20,6 +20,7 @@ export default class UIRegister extends UIView {
     myName: EditBox;
 
     public onOpen(fromUI: number, ...args : any): void {
+        super.onOpen(fromUI, ...args);
         let accountId = oo.storage.get("accountId");
         oo.log.logView(accountId, "accountId");
         this.myAccount.string = accountId;
@@ -33,7 +34,7 @@ export default class UIRegister extends UIView {
                 let resp = LoginToGameResp.decode(new Uint8Array(data));
                 oo.log.logNet(resp, "注册游戏账号");
                 if (resp.code == ErrorCode.OK) {
-                    uiManager.replace(UIID.UIHall, resp.roomList);
+                    uiManager.replace(UIID.UIHall);
                 }
             }
         }

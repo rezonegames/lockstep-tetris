@@ -35,13 +35,8 @@ enum TableState {
 enum RoomType {
   ROOMTYPE_NONE = 0;
   QUICK = 1;
-  MATCH = 2;
-}
-
-enum TableType {
-  TABLETYPE_NONE = 0;
-  NORMAL = 1;
-  HAPPY = 2;
+  FRIEND = 2;
+  MATCH = 3;
 }
 
 enum ActionType {

@@ -25,14 +25,7 @@ export default class UILogin extends UIView {
 
     onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
-        oo.http.server = `http://192.168.8.76:8000`;
-        // oo.http.server = `http://192.168.3.23:8000`;
-        // oo.http.server = `http://127.0.0.1:8000`;
-        channel.gameClose();
-        channel.gameCreate();
-    }
 
-    start() {
         this.clearConnect();
         tween(this.testSprite.node)
             .to(1, {
@@ -50,6 +43,12 @@ export default class UILogin extends UIView {
                 {easing: 'sineOutIn'}
             )
             .start()
+
+        oo.http.server = `http://192.168.8.76:8000`;
+        // oo.http.server = `http://192.168.3.23:8000`;
+        // oo.http.server = `http://127.0.0.1:8000`;
+        channel.gameClose();
+        channel.gameCreate();
     }
 
     clearConnect() {
