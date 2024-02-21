@@ -1,96 +1,89 @@
 package room
 
 import (
+	"errors"
 	"fmt"
-	"github.com/lonng/nano"
+	"github.com/lonng/nano/scheduler"
 	"github.com/lonng/nano/session"
-	"tetris/config"
 	"tetris/internal/game/util"
-	"tetris/models"
 	"tetris/proto/proto"
+	"time"
 )
 
 type FriendRoom struct {
-	group  *nano.Group
-	config *config.Room
-	tables map[string]util.TableEntity
-	roomId string
+	*Room
+}
+
+func (f *FriendRoom) CreateTable(s *session.Session, tableId, password string) (util.TableEntity, error) {
+	if _, ok := f.tables[tableId]; ok {
+		return nil, errors.New("table already exist!!")
+	}
+	var (
+		opt = &util.TableOption{
+			Room:          f,
+			Password:      password,
+			CustomTableId: fmt.Sprintf("%s:%s", f.roomId, tableId),
+		}
+		table util.TableEntity
+		err   error
+	)
+
+	table = NewTable(opt)
+
+	err = table.SitDown(s, 0, password)
+	if err != nil {
+		return nil, err
+	}
+
+	f.tables[tableId] = table
+
+	return table, nil
+}
+
+func NewFriendRoom(opt *util.RoomOption) *FriendRoom {
+	room := &FriendRoom{
+		Room: NewNormalRoom(opt),
+	}
+	return room
+}
+
+func (f *FriendRoom) AfterInit() {
+	f.Room.AfterInit()
+
+	scheduler.NewTimer(1*time.Second, func() {
+		// 最少10个桌子，方便加入
+		count := len(f.tables)
+		for i := 0; i < 10-count; i++ {
+			var (
+				tableId = fmt.Sprintf("%s:%d", f.roomId, i)
+				opt     = &util.TableOption{
+					Room:          f,
+					SessionList:   nil,
+					CustomTableId: tableId,
+				}
+			)
+
+			if _, ok := f.tables[tableId]; ok {
+				continue
+			}
+
+			t := NewTable(opt)
+			f.tables[tableId] = t
+		}
+	})
 }
 
 func (f *FriendRoom) GetInfo() *proto.Room {
 	var (
-		roomInfo  = f.config.Conv2Proto()
+		roomInfo  = f.Room.GetInfo()
 		tableList = make([]*proto.TableInfo, 0)
 	)
+
 	for _, v := range f.tables {
 		tableList = append(tableList, v.GetInfo())
 	}
-	roomInfo.PlayerCount = int32(f.group.Count())
+
 	roomInfo.TableList = tableList
+
 	return roomInfo
-}
-
-func NewFriendRoom(opt *util.RoomOption) *FriendRoom {
-	var (
-		conf   = opt.Config
-		roomId = conf.RoomId
-	)
-
-	return &FriendRoom{
-		roomId: roomId,
-		group:  nano.NewGroup(roomId),
-		config: conf,
-		tables: make(map[string]util.TableEntity, 0),
-	}
-}
-
-func (f *FriendRoom) AfterInit() {
-	// 创建10个桌子，方便加入
-	for i := 0; i < 10; i++ {
-		var (
-			tableId = fmt.Sprintf("%s:%d", f.roomId, i)
-			opt     = &util.TableOption{
-				Room:          f,
-				SessionList:   nil,
-				CustomTableId: tableId,
-			}
-		)
-		t := NewTable(opt)
-		f.tables[tableId] = t
-	}
-}
-
-func (f *FriendRoom) BeforeShutdown() {
-	for _, uid := range f.group.Members() {
-		models.RemoveRoundSession(uid)
-	}
-}
-
-func (f *FriendRoom) Leave(s *session.Session) error {
-	return nil
-}
-
-func (f *FriendRoom) Join(s *session.Session) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendRoom) GetConfig() *config.Room {
-	//TODO implement me
-	return f.config
-}
-
-func (f *FriendRoom) OnTableDeleted(tableId string) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendRoom) BackToWait(sList []*session.Session) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendRoom) Entity(tableId string) (util.TableEntity, error) {
-	//TODO implement me
-	panic("implement me")
 }

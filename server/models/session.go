@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strconv"
 	"tetris/pkg/z"
 	"time"
 )
@@ -9,6 +10,7 @@ import (
 type RoundSession struct {
 	RoomId  string
 	TableId string
+	RoundId int32
 }
 
 func ROUND_SESSION_KEY(userId int64) string {
@@ -16,47 +18,66 @@ func ROUND_SESSION_KEY(userId int64) string {
 }
 
 func GetRoundSession(userId int64) (*RoundSession, error) {
-	vs, err := rclient.HGetAll(ROUND_SESSION_KEY(userId)).Result()
+	var (
+		cmds map[string]string
+		err  error
+		rs   = &RoundSession{}
+	)
+	cmds, err = rclient.HGetAll(ROUND_SESSION_KEY(userId)).Result()
 	if err != nil {
 		return nil, err
 	}
-	var rs RoundSession
-	for k, v := range vs {
-		if k == "roomId" {
+	for k, v := range cmds {
+		if k == "room" {
 			rs.RoomId = v
 		}
-		if k == "tableId" {
+		if k == "table" {
 			rs.TableId = v
+		}
+		if k == "round" {
+			var roundId, _ = strconv.Atoi(v)
+			rs.RoundId = int32(roundId)
 		}
 	}
 	if rs.RoomId == "" {
 		return nil, z.NilError{}
 	}
-	return &rs, nil
+	return rs, nil
 }
 
 func SetRoomId(userId int64, roomId string) error {
-	key := ROUND_SESSION_KEY(userId)
-	err := rclient.HSet(key, "roomId", roomId).Err()
+	var (
+		key = ROUND_SESSION_KEY(userId)
+		err error
+	)
+
+	err = rclient.HSet(key, "room", roomId).Err()
 	if err != nil {
 		return err
 	}
-	rclient.Expire(key, 20*time.Minute)
-	return nil
+	return rclient.Expire(key, 20*time.Minute).Err()
 }
 
-func SetTableId(userId int64, tableId string) error {
-	key := ROUND_SESSION_KEY(userId)
-	err := rclient.HSet(key, "tableId", tableId).Err()
+func SetTableId(userId int64, tableId string, roundId int32) error {
+	var (
+		key    = ROUND_SESSION_KEY(userId)
+		err    error
+		fields = make(map[string]interface{}, 0)
+	)
+
+	fields["table"] = tableId
+	fields["round"] = roundId
+
+	err = rclient.HMSet(key, fields).Err()
 	if err != nil {
 		return err
 	}
-	rclient.Expire(key, 20*time.Minute)
-	return nil
+	return rclient.Expire(key, 20*time.Minute).Err()
 }
 
 func RemoveTableId(userId int64) {
-	rclient.HDel(ROUND_SESSION_KEY(userId), "tableId")
+	rclient.HDel(ROUND_SESSION_KEY(userId), "table")
+	rclient.HDel(ROUND_SESSION_KEY(userId), "round")
 }
 
 func RemoveRoundSession(userId int64) {

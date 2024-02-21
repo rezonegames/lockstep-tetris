@@ -109,8 +109,7 @@ export default class UIControl extends UIView {
 
     notifyResProgress() {
         oo.log.logView("", "res.ok");
-        let buf = LoadRes.encode({current: 100}).finish();
-        channel.gameNotify("r.loadres", buf);
+        channel.gameNotify("r.loadres", LoadRes.encode({current: 100}).finish());
     }
 
     onDestroy() {
@@ -123,6 +122,9 @@ export default class UIControl extends UIView {
         btn.getComponent(Sprite).color = tetris.colorArray[player.teamId];
         btn.getChildByName("Label").getComponent(Label).string = `T/${player.teamId}`;
         btn.on("click", () => {
+            if (this.my.player.isEnd) {
+                return;
+            }
             let children = this.itemContainer.node.children;
             if (children.length > 0) {
                 let node = children[0];
@@ -203,8 +205,7 @@ export default class UIControl extends UIView {
 
     // 发送操作数据
     serialize(action: ActionType, valList: number[], to: number = 0, from: number = 0) {
-        let buf = UpdateFrame.encode({action: {key: action, valList, from, to}}).finish();
-        channel.gameNotify("r.update", buf);
+        channel.gameNotify("r.update", UpdateFrame.encode({action: {key: action, valList, from, to}}).finish());
     }
 
     // 解析网络过来的操作数据

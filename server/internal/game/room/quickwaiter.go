@@ -1,8 +1,6 @@
 package room
 
 import (
-	"github.com/google/uuid"
-	"github.com/lonng/nano"
 	"github.com/lonng/nano/scheduler"
 	"github.com/lonng/nano/session"
 	"tetris/internal/game/util"
@@ -13,34 +11,49 @@ import (
 )
 
 type QuickWaiter struct {
-	uiid        string
-	group       *nano.Group
 	readys      map[int64]int64
+	sessions    map[int64]*session.Session
 	room        util.RoomEntity
 	table       util.TableEntity
 	timeCounter int32
 	countDown   int32
 	stime       *scheduler.Timer
-	sList       []*session.Session
+	leaves      map[int64]bool
 }
 
-// NewWaiter返回错误代表有人下线了
-func NewQuickWaiter(sList []*session.Session, room util.RoomEntity, table util.TableEntity) *QuickWaiter {
-	uiid := uuid.New().String()
-	w := &QuickWaiter{
-		uiid:      uiid,
-		group:     nano.NewGroup(uiid),
+func (w *QuickWaiter) ResetWaiter() {
+	//TODO implement me
+	return
+}
+
+func (w *QuickWaiter) CancelReady(s *session.Session) {
+	//TODO implement me
+	return
+}
+
+// NewQuickWaiter 类似王者荣耀的waiter
+func NewQuickWaiter(opt *util.WaiterOption) *QuickWaiter {
+
+	var (
+		room  = opt.Room
+		table = opt.Table
+		sList = opt.SessionList
+	)
+	waiter := &QuickWaiter{
 		room:      room,
-		sList:     make([]*session.Session, 0),
 		table:     table,
 		readys:    make(map[int64]int64, 0),
+		sessions:  make(map[int64]*session.Session, 0),
 		countDown: 30,
+		leaves:    make(map[int64]bool, 0),
 	}
+
 	for _, v := range sList {
-		w.group.Add(v)
+		var uid = v.UID()
+		waiter.sessions[uid] = v
 	}
-	w.sList = sList
-	return w
+
+	return waiter
 }
 
 func (w *QuickWaiter) AfterInit() {
@@ -54,42 +67,50 @@ func (w *QuickWaiter) AfterInit() {
 // Dismiss 解散
 func (w *QuickWaiter) CheckAndDismiss() {
 	// 中途有离开或者10秒倒计时有玩家没有准备，返回到队列
-	//log.Debug("CheckAndDismiss %d %d", len(w.readys), w.group.Count())
-	hasLeave := w.group.Count() != len(w.sList)
-	if len(w.readys) == len(w.sList) {
-		log.Debug("waiter %s done ", w.table.GetTableId())
-		w.table.BackToTable()
-	} else if (w.timeCounter >= w.countDown && len(w.readys) < len(w.sList)) || hasLeave {
-		log.Debug("waiter %s Dismiss", w.table.GetTableId())
-		bList := make([]*session.Session, 0)
-		for _, v := range w.sList {
-			back := false
-			if _, ok := w.readys[v.UID()]; ok {
+	if len(w.readys) == len(w.sessions) {
+		log.Debug(w.table.Format("waiter done"))
+		w.table.ChangeState(proto.TableState_CHECK_RES)
+
+	} else if (w.timeCounter >= w.countDown && len(w.readys) < len(w.sessions)) || len(w.leaves) > 0 {
+		log.Debug(w.table.Format("waiter dismiss"))
+
+		var bList = make([]*session.Session, 0)
+		// 已经ready的，或者没有退出的，在某个人退出的时候，重新把玩家拉回
+		for k, v := range w.sessions {
+
+			var (
+				back       = false
+				_, isLeave = w.leaves[k]
+				_, isReady = w.readys[k]
+			)
+
+			if isReady {
 				back = true
-			} else {
-				if hasLeave && w.group.Contains(v.UID()) {
-					back = true
-				}
+			} else if len(w.leaves) > 0 && !isLeave {
+				back = true
 			}
-			w.table.Leave(v)
+
 			if back {
 				bList = append(bList, v)
-			} else {
-				w.room.Leave(v)
 			}
 		}
-		w.room.BackToWait(bList)
+
+		w.table.ChangeState(proto.TableState_CANCEL)
+
+		scheduler.NewAfterTimer(100*time.Millisecond, func() {
+			// todo：注意这个最后执行，有个时间差
+			w.room.BackToWait(bList)
+		})
+
 	} else {
+		// 倒计时
 		w.table.ChangeState(proto.TableState_WAITREADY)
 		return
 	}
-	w.group.Close()
-	w.sList = make([]*session.Session, 0)
+	w.sessions = make(map[int64]*session.Session, 0)
 	w.stime.Stop()
 }
 
-//
-// 返回等待信息
 func (w *QuickWaiter) GetInfo() *proto.TableInfo_Waiter {
 	return &proto.TableInfo_Waiter{
 		Readys:    w.readys,
@@ -97,7 +118,6 @@ func (w *QuickWaiter) GetInfo() *proto.TableInfo_Waiter {
 	}
 }
 
-//
 // Ready 准备
 func (w *QuickWaiter) Ready(s *session.Session) error {
 	uid := s.UID()
@@ -107,6 +127,8 @@ func (w *QuickWaiter) Ready(s *session.Session) error {
 }
 
 func (w *QuickWaiter) Leave(s *session.Session) error {
-	delete(w.readys, s.UID())
-	return w.group.Leave(s)
+	var uid = s.UID()
+	delete(w.readys, uid)
+	w.leaves[uid] = true
+	return nil
 }

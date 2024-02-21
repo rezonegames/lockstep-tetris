@@ -48,6 +48,7 @@ func (r *Room) Conv2Proto() *proto.Room {
 		Name:      r.Name,
 		MinCoin:   r.MinCoin,
 		Prefab:    r.Prefab,
+		Type:      r.RoomType,
 		TableList: nil,
 	}
 }

@@ -14,5 +14,9 @@ export enum ErrorCode {
   RoomDismissError = 7,
   JoinError = 8,
   LeaveError = 9,
+  SitDownError = 10,
+  StandUpErrpr = 11,
+  CreateTableError = 12,
+  KickUserError = 13,
   UNRECOGNIZED = -1,
 }

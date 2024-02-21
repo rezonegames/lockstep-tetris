@@ -45,12 +45,13 @@ export default class UIWaiting extends UIView {
         super.onOpen(fromUI, ...args);
         oo.event.addEventListener("onState", this.onState, this);
         let room = args[0] as Room;
-        this.title.string = `房间信息：名字：${room.name} 房间ID：${room.roomId}`;
+        let [name, roomId] = [room.name, room.roomId];
+        this.title.string = `房间信息：名字：${name} 房间ID：${roomId}`;
         this.clear();
     }
 
-    onDestroy() {
-        super.onDestroy();
+    public onClose(): any {
+        super.onClose();
         oo.event.removeEventListener("onState", this.onState, this);
     }
 
@@ -140,7 +141,7 @@ export default class UIWaiting extends UIView {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = LeaveResp.decode(new Uint8Array(data.body));
-                oo.log.logNet(resp, "ready返回");
+                oo.log.logNet(resp, "leave返回");
                 if (resp.code == ErrorCode.OK) {
                     uiManager.close();
                 }

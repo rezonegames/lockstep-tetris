@@ -24,11 +24,15 @@ export enum GameState {
 
 export enum TableState {
   STATE_NONE = 0,
+  /** WAITREADY - 在桌子，不过没开始游戏，只要有一个坐下，状态由none-》切换到waitready */
   WAITREADY = 1,
+  /** CANCEL - 只有是quick的房间才会有这个状态，超过20秒，没有准备解散，或者有玩家退出解散 */
   CANCEL = 2,
+  /** CHECK_RES - 游戏开始了 */
   CHECK_RES = 3,
   GAMING = 4,
   SETTLEMENT = 5,
+  /** ABORT - 中断了，游戏还没结束，都跑了！！ */
   ABORT = 6,
   UNRECOGNIZED = -1,
 }

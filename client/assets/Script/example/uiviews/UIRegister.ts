@@ -1,5 +1,5 @@
-import { UIID } from "../UIExample";
-import { Sprite, _decorator, Label, EditBox } from "cc";
+import {UIID} from "../UIExample";
+import {Sprite, _decorator, Label, EditBox} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {LoginToGameResp, RegisterGameReq} from "db://assets/Script/example/proto/client";
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
@@ -19,7 +19,7 @@ export default class UIRegister extends UIView {
     @property(EditBox)
     myName: EditBox;
 
-    public onOpen(fromUI: number, ...args : any): void {
+    public onOpen(fromUI: number, ...args: any): void {
         super.onOpen(fromUI, ...args);
         let accountId = oo.storage.get("accountId");
         oo.log.logView(accountId, "accountId");
@@ -27,8 +27,10 @@ export default class UIRegister extends UIView {
     }
 
     onRegister() {
-        let buf = RegisterGameReq.encode({name: this.myName.string, accountId: this.myAccount.string}).finish();
-        let rspObject: CallbackObject = {
+        channel.gameReqest("g.register", RegisterGameReq.encode({
+            name: this.myName.string,
+            accountId: this.myAccount.string
+        }).finish(), {
             target: null,
             callback: (cmd: number, data: any) => {
                 let resp = LoginToGameResp.decode(new Uint8Array(data));
@@ -37,8 +39,7 @@ export default class UIRegister extends UIView {
                     uiManager.replace(UIID.UIHall);
                 }
             }
-        }
-        channel.gameReqest("g.register", buf, rspObject);
+        });
     }
 
 }

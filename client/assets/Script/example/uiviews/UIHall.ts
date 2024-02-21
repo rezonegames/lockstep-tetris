@@ -1,21 +1,14 @@
 import {UIID} from "../UIExample";
-import {Sprite, _decorator, Label, Node, Layout} from "cc";
-import {SpriteFrame} from "cc";
+import {_decorator, Label, Node} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
-import {
-    GameStateResp,
-    GetRoomList,
-    GetRoomListResp,
-    Join,
-    JoinResp,
-    Room
-} from "db://assets/Script/example/proto/client";
+import {GetRoomList, GetRoomListResp, Join, JoinResp, Room} from "db://assets/Script/example/proto/client";
 import {oo} from "db://assets/Script/core/oo";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {channel} from "db://assets/Script/example/Channel";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
+import {RoomType} from "db://assets/Script/example/proto/consts";
 
 const {ccclass, property} = _decorator;
 
@@ -50,8 +43,23 @@ export default class UIHall extends UIView {
                 itemNode.getChildByName("name").getComponent(Label).string = `房间：${item.roomId}`;
                 itemNode.getChildByName("desc").getComponent(Label).string = `信息：${item.name}`;
                 itemNode.getChildByName("count").getComponent(Label).string = `人数：${item.playerCount}`;
+                //
                 let quickStart = itemNode.getChildByName("quickstart");
                 quickStart.off("click");
+                let label = quickStart.getChildByName("Label").getComponent(Label);
+                let  name = "";
+                switch (item.type) {
+                    case RoomType.QUICK:
+                        name = "快速开始";
+                        break;
+                    case RoomType.FRIEND:
+                        name = "进入";
+                        break;
+                    case RoomType.MATCH:
+                        name = "报名";
+                        break
+                }
+                label.string = name;
                 quickStart.on("click", ()=>{
                     let buf = Join.encode({roomId: item.roomId}).finish()
                     let rspObject: CallbackObject = {
@@ -60,7 +68,20 @@ export default class UIHall extends UIView {
                             let resp = JoinResp.decode(new Uint8Array(data.body));
                             oo.log.logNet(resp, "快速开始，loading排队");
                             if (resp.code == ErrorCode.OK) {
-                                uiManager.open(UIID.UIWaiting, item);
+
+                                switch (item.type) {
+                                    case RoomType.QUICK:
+                                        uiManager.open(UIID.UIWaiting, item);
+                                        break;
+                                    case RoomType.FRIEND:
+                                        uiManager.open(UIID.UIRoom, item);
+                                        break;
+                                    case RoomType.MATCH:
+                                        name = "报名";
+                                        break
+                                }
+
+
                             }
                         }
                     }
@@ -73,6 +94,9 @@ export default class UIHall extends UIView {
     }
 
     getRoomList() {
+        if(!uiManager.isTopUI(UIID.UIHall)) {
+            return;
+        }
         let buf = GetRoomList.encode({}).finish()
         let rspObject: CallbackObject = {
             target: this,

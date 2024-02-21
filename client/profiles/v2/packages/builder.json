@@ -3,7 +3,5 @@
   "version": {
     "builder": "1.2.3"
   },
-  "log": {
-    "level": 4
-  }
+  "log": {}
 }

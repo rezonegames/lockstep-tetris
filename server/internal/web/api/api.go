@@ -13,76 +13,81 @@ import (
 
 // QueryHandler 登录，如果玩家没有注册，自动注册之，只实现一种deviceId登录， todo：host暂时写死
 func QueryHandler(c *gin.Context) {
-	var req proto.AccountLoginReq
-	err := zweb.BindProto(c, &req)
+
+	var (
+		req proto.AccountLoginReq
+		err error
+	)
+
+	err = zweb.BindProto(c, &req)
 	if err != nil {
-		zweb.Response(c, &proto.AccountLoginResp{
-			Code: proto.ErrorCode_UnknownError,
-		})
-		return
+		goto EXIT
 	}
 
-	partition := req.Partition
-	accountId := req.AccountId
-	if accountId == "" {
-		zweb.Response(c, &proto.AccountLoginResp{
-			Code: proto.ErrorCode_UnknownError,
-		})
-		return
-	}
-	var userId int64
-	switch partition {
-	case proto.AccountType_DEVICEID:
-		fallthrough
-	case proto.AccountType_FB:
-		fallthrough
-	case proto.AccountType_WX:
-		a, err := models.GetAccount(accountId)
-		if err != nil {
-			if _, ok := err.(z.NilError); ok {
-				a = models.NewAccount(int32(partition), accountId)
-				err = models.CreateAccount(a)
-				if err != nil {
-					zweb.Response(c, &proto.AccountLoginResp{
-						Code: proto.ErrorCode_UnknownError,
-					})
-					return
+	{
+		var (
+			partition = req.Partition
+			accountId = req.AccountId
+			userId    int64
+			name      string
+			config    = config.ServerConfig
+			ip        string
+			profile   *models.Profile
+			account   *models.Account
+		)
+
+		if accountId == "" {
+			goto EXIT
+		}
+
+		switch partition {
+		case proto.AccountType_DEVICEID:
+			fallthrough
+		case proto.AccountType_FB:
+			fallthrough
+		case proto.AccountType_WX:
+			account, err = models.GetAccount(accountId)
+			if err != nil {
+				if _, ok := err.(z.NilError); ok {
+					account = models.NewAccount(int32(partition), accountId)
+					err = models.CreateAccount(account)
+					if err != nil {
+						goto EXIT
+					}
+				} else {
+					goto EXIT
 				}
-			} else {
-				zweb.Response(c, &proto.AccountLoginResp{
-					Code: proto.ErrorCode_UnknownError,
-				})
-				return
 			}
+			userId = account.UserId
+
+			if userId != 0 {
+				profile, err = models.GetProfile(userId, "name")
+				if err == nil {
+					name = profile.Name
+				}
+			}
+
+		default:
+			log.Error("queryHandler no account %d %s", partition, accountId)
+			goto EXIT
 		}
-		userId = a.UserId
-	default:
-		log.Error("queryHandler no account %d %s", partition, accountId)
+
+		ip, err = z.GetIp()
+		if err != nil {
+			goto EXIT
+		}
+
 		zweb.Response(c, &proto.AccountLoginResp{
-			Code: proto.ErrorCode_UnknownError,
+			Code:   proto.ErrorCode_OK,
+			UserId: userId,
+			Addr:   fmt.Sprintf("%s%s", ip, config.Addr),
+			Name:   name,
 		})
 		return
 	}
 
-	var name string
-	if userId != 0 {
-		if p, err := models.GetProfile(userId, "name"); err == nil {
-			name = p.Name
-		}
-	}
-	sc := config.ServerConfig
-	ip, err := z.GetIp()
-	if err != nil {
-		zweb.Response(c, &proto.AccountLoginResp{
-			Code: proto.ErrorCode_UnknownError,
-		})
-		return
-	}
-	resp := &proto.AccountLoginResp{
-		Code:   proto.ErrorCode_OK,
-		UserId: userId,
-		Addr:   fmt.Sprintf("%s%s", ip, sc.Addr),
-		Name:   name,
-	}
-	zweb.Response(c, resp)
+EXIT:
+	zweb.Response(c, &proto.AccountLoginResp{
+		Code: proto.ErrorCode_UnknownError,
+	})
 }

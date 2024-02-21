@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,24 +24,28 @@ func (r responseBodyWriter) Write(b []byte) (int, error) {
 	return r.ResponseWriter.Write(b)
 }
 
+// Logger todo：protobuf的logger如何处理
 func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		t := time.Now()
-		bodyBytes, _ := io.ReadAll(c.Request.Body)
-		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+		var (
+			t = time.Now()
+		)
+
 		url := c.Request.URL.Path
-		//log.Info("request url %s body %+v", url, string(bodyBytes))
-		w := &responseBodyWriter{body: &bytes.Buffer{}, ResponseWriter: c.Writer}
-		c.Writer = w
 		c.Next()
 		latency := time.Since(t)
-		log.Info("response for url %s latency %+v body %s resp %s", url, latency, string(bodyBytes), w.body.String())
+
+		var (
+			param, _ = c.Get("body")
+			resp, _  = c.Get("resp")
+		)
+
+		log.Info("url: %s latency: %+v body: %+v resp: %+v", url, latency, param, resp)
 	}
 }
 
 func Register(r *gin.Engine) {
-	/**
-	 */
 	r.POST("/v1/login", api.QueryHandler)
 }
 

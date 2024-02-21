@@ -1,108 +1,58 @@
 package room
 
 import (
-	"github.com/lonng/nano"
+	"errors"
 	"github.com/lonng/nano/session"
-	"sync"
-	"tetris/config"
 	"tetris/internal/game/util"
-	"tetris/proto/proto"
-	"time"
+	"tetris/pkg/log"
 )
 
 type FriendTable struct {
-	group         *nano.Group
-	tableId       string
-	conf          *config.Room
-	clients       map[int64]util.ClientEntity
-	loseTeams     map[int32]int64
-	teamGroupSize int32
-	lock          sync.RWMutex
-	waiter        util.WaiterEntity
-	room          util.RoomEntity
-	begin         time.Time
-	state         proto.TableState
-	end           chan bool
-	nextFrameId   int64
-	frameTimes    map[int64]int64
-	randSeed      int64
-	pieceList     []int32
-	resCountDown  int32 // 检查资源是否加载成功
-	res           map[int64]int32
+	*Table
 }
 
 func NewFriendTable(opt *util.TableOption) *FriendTable {
+	var (
+		room = opt.Room
+	)
 
-	return &FriendTable{}
+	table := &FriendTable{
+		Table: NewNormalTable(opt),
+	}
+
+	table.waiter = NewWaiter(&util.WaiterOption{
+		Room:  room,
+		Table: table,
+	})
+
+	return table
 }
 
 func (f *FriendTable) AfterInit() {
-	//TODO implement me
-	//panic("implement me")
-}
+	f.Table.AfterInit()
 
-func (f *FriendTable) GetTableId() string {
-	//TODO implement me
-	panic("implement me")
-}
+	go func() {
+		defer log.Info(f.Format("[AfterInit] chRoundOver"))
 
-func (f *FriendTable) GetInfo() *proto.TableInfo {
-	var (
-		tableInfo = &proto.TableInfo{
-			Players:    nil,
-			TableId:    f.tableId,
-			TableState: f.state,
-			LoseTeams:  f.loseTeams,
-			RandSeed:   f.randSeed,
+		for {
+			select {
+			case <-f.chRoundOver:
+				// 清理，为下一局准备
+				f.ResetTable()
+			}
 		}
+	}()
+}
+
+func (f *FriendTable) KickUser(s *session.Session, kickUser int64) error {
+	var (
+		uid        = s.UID()
+		client     = f.Entity(uid)
+		kickClient = f.Entity(kickUser)
 	)
-	return tableInfo
-}
-
-func (f *FriendTable) BackToTable() {
-	//TODO implement me
-}
-
-func (f *FriendTable) WaiterEntity() util.WaiterEntity {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendTable) Entity(uid int64) util.ClientEntity {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendTable) ChangeState(state proto.TableState) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendTable) Ready(s *session.Session) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendTable) LoadRes(s *session.Session, msg *proto.LoadRes) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendTable) Update(s *session.Session, msg *proto.UpdateFrame) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendTable) ResumeTable(s *session.Session, msg *proto.ResumeTable) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (f *FriendTable) Leave(s *session.Session) error {
-	return nil
-}
-
-func (f *FriendTable) Join(s *session.Session, tableId string) error {
-	//TODO implement me
-	panic("implement me")
+	client = f.Entity(uid)
+	if client.GetSeatId() != 0 {
+		return errors.New("player permission error")
+	}
+	return f.StandUp(kickClient.GetSession())
 }

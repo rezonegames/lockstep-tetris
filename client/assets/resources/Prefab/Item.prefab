@@ -8,14 +8,13 @@
       "__id__": 1
     },
     "optimizationPolicy": 0,
-    "asyncLoadAssets": false,
-    "readonly": false,
     "persistent": false
   },
   {
     "__type__": "cc.Node",
     "_name": "Item",
     "_objFlags": 0,
+    "__editorExtras__": {},
     "_parent": null,
     "_children": [],
     "_active": true,
@@ -52,6 +51,7 @@
       "y": 1,
       "z": 1
     },
+    "_mobility": 0,
     "_layer": 1,
     "_euler": {
       "__type__": "cc.Vec3",
@@ -59,10 +59,6 @@
       "y": 0,
       "z": 0
     },
-    "_level": 1,
-    "_skewX": 0,
-    "_skewY": 0,
-    "_is3DNode": false,
     "_id": ""
   },
   {
@@ -77,9 +73,9 @@
       "__id__": 3
     },
     "_customMaterial": {
-      "__uuid__": "fda095cb-831d-4601-ad94-846013963de8"
+      "__uuid__": "fda095cb-831d-4601-ad94-846013963de8",
+      "__expectedType__": "cc.Material"
     },
-    "_visFlags": 0,
     "_srcBlendFactor": 2,
     "_dstBlendFactor": 4,
     "_color": {
@@ -90,7 +86,8 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "ce0fb307-84f4-4841-a0ec-4b0960e7ba6e@e8d5f"
+      "__uuid__": "ce0fb307-84f4-4841-a0ec-4b0960e7ba6e@e8d5f",
+      "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
     "_fillType": 0,
@@ -105,7 +102,8 @@
     "_isTrimmedMode": true,
     "_useGrayscale": false,
     "_atlas": {
-      "__uuid__": "ce0fb307-84f4-4841-a0ec-4b0960e7ba6e"
+      "__uuid__": "ce0fb307-84f4-4841-a0ec-4b0960e7ba6e",
+      "__expectedType__": "cc.SpriteAtlas"
     },
     "_id": ""
   },
@@ -124,7 +122,8 @@
     "__prefab": {
       "__id__": 5
     },
-    "_opacity": 255
+    "_opacity": 255,
+    "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
@@ -141,7 +140,6 @@
     "__prefab": {
       "__id__": 7
     },
-    "_priority": 0,
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 68,
@@ -151,7 +149,8 @@
       "__type__": "cc.Vec2",
       "x": 0.5,
       "y": 0.5
-    }
+    },
+    "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
@@ -165,6 +164,8 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "46SPVE5vlO6pqbOMce/tA9"
+    "fileId": "46SPVE5vlO6pqbOMce/tA9",
+    "instance": null,
+    "targetOverrides": null
   }
 ]

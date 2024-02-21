@@ -25,6 +25,7 @@ message TableInfo {
     bool end = 2;
     int32 score = 3;
     Profile profile = 4;
+    int32 seatId = 5;
   }
 
   // 桌子等待
@@ -47,6 +48,8 @@ message TableInfo {
   Res res = 6;
   Room room = 7;
   int64 randSeed = 8;
+  bool hasPassword = 10;
+  int32 roundId = 11;
 
   // 结算本局时用的
   map<int64, OnItemChange> playerItems = 9;
@@ -58,6 +61,7 @@ message Room {
   string name = 3;
   int32 minCoin = 4;
   string prefab = 5;
+  RoomType type = 8;
 
   repeated TableInfo tableList = 6;
   int32 playerCount = 7;
@@ -80,6 +84,7 @@ message LoginToGameResp {
   Profile profile = 2;
   string roomId = 4;
   string tableId = 5;
+  int32 roundId = 6;
 }
 
 message RegisterGameReq {
@@ -94,6 +99,51 @@ message GetRoomList {
 message GetRoomListResp {
   ErrorCode code = 1;
   repeated Room roomList = 2;
+}
+
+message GetRoomInfo {
+  string roomId = 1;
+}
+
+message GetRoomInfoResp {
+  ErrorCode code = 1;
+  Room room = 2;
+}
+
+message CreateTable {
+  string tableId = 1;
+  string password = 2;
+}
+
+message CreateTableResp {
+  ErrorCode code = 1;
+  TableInfo table = 2;
+}
+
+message SitDown {
+  string tableId = 1;
+  string password = 2;
+  int32 seatId = 3;
+}
+
+message SitDownResp {
+  ErrorCode code = 1;
+}
+
+message StandUp {
+
+}
+
+message StandUpResp {
+  ErrorCode code = 1;
+}
+
+message KickUser {
+  int64 userId = 1;
+}
+
+message KickUserResp {
+  ErrorCode code =1;
 }
 
 message Join {

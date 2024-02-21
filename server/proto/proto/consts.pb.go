@@ -132,12 +132,16 @@ type TableState int32
 
 const (
 	TableState_STATE_NONE TableState = 0
-	TableState_WAITREADY  TableState = 1
-	TableState_CANCEL     TableState = 2
+	// 在桌子，不过没开始游戏，只要有一个坐下，状态由none-》切换到waitready
+	TableState_WAITREADY TableState = 1
+	// 只有是quick的房间才会有这个状态，超过20秒，没有准备解散，或者有玩家退出解散
+	TableState_CANCEL TableState = 2
+	// 游戏开始了
 	TableState_CHECK_RES  TableState = 3
 	TableState_GAMING     TableState = 4
 	TableState_SETTLEMENT TableState = 5
-	TableState_ABORT      TableState = 6
+	// 中断了，游戏还没结束，都跑了！！
+	TableState_ABORT TableState = 6
 )
 
 // Enum value maps for TableState.

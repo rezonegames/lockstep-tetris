@@ -76,23 +76,29 @@ func (g *GateService) Login(s *session.Session, msg *proto.LoginToGame) error {
 	var (
 		uid             = msg.UserId
 		roomId, tableId string
+		roundId         int32
+		rs              *models.RoundSession
+		err             error
+		profile         *models.Profile
 	)
 
-	p, err := g.online(s, uid)
+	profile, err = g.online(s, uid)
 	if err != nil {
 		return err
 	}
 	// 返回所在的房间号和桌子号
-	rs, err := models.GetRoundSession(uid)
+	rs, err = models.GetRoundSession(uid)
 	if err == nil {
 		roomId = rs.RoomId
 		tableId = rs.TableId
+		roundId = rs.RoundId
 	}
 
 	return s.Response(&proto.LoginToGameResp{
 		Code:    proto.ErrorCode_OK,
-		Profile: util.ConvProfileToProtoProfile(p),
+		Profile: util.ConvProfileToProtoProfile(profile),
 		RoomId:  roomId,
 		TableId: tableId,
+		RoundId: roundId,
 	})
 }

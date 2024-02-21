@@ -19,6 +19,8 @@ export enum UIID {
     UILogin,
     UIRegister,
     UIHall,
+    UIRoom,
+    UITable,
     UINotice,
     UIWaiting,
     UIControl,
@@ -28,6 +30,8 @@ export enum UIID {
 export let UICF: { [key: number]: UIConf } = {
     [UIID.UILogin]: {prefab: "Prefab/Login"},
     [UIID.UIHall]: {prefab: "Prefab/Hall"},
+    [UIID.UIRoom]: {prefab: "Prefab/Room"},
+    [UIID.UITable]: {prefab: "Prefab/Table"},
     [UIID.UIRegister]: {prefab: "Prefab/Register"},
     [UIID.UIWaiting]: {prefab: "Prefab/Waiting"},
     [UIID.UIControl]: {prefab: "Prefab/Control"},

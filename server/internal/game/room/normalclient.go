@@ -4,39 +4,53 @@ import (
 	"github.com/lonng/nano/session"
 	"sync"
 	"tetris/internal/game/util"
-	"tetris/pkg/z"
 	"tetris/proto/proto"
-	"time"
 )
 
 type NormalClient struct {
-	player       *proto.TableInfo_Player
-	s            *session.Session
-	lastUpdateAt time.Time
-	table        util.TableEntity
-	frames       map[int64][]*proto.Action
-	lock         sync.RWMutex //锁，用于存帧
-	lastFrameId  int64        // 当前客户端到了哪帧
-	speed        int64
-	resProgress  int32
+	player      *proto.TableInfo_Player
+	s           *session.Session
+	frames      map[int64][]*proto.Action
+	lock        sync.RWMutex //锁，用于存帧
+	lastFrameId int64        // 当前客户端到了哪帧
+	resProgress int32
 }
 
-func NewNormalClient(s *session.Session, teamId int32, table util.TableEntity) *NormalClient {
-	p, _ := util.GetProfile(s)
-	c := &NormalClient{
+func (c *NormalClient) SetSeatId(seatId int32) {
+	c.player.SeatId = seatId
+}
+
+func (c *NormalClient) GetSeatId() int32 {
+	return c.player.SeatId
+}
+
+func (c *NormalClient) ResetClient() {
+	c.frames = make(map[int64][]*proto.Action, 0)
+	c.player.End = false
+	c.lastFrameId = 0
+	c.resProgress = 0
+}
+
+func NewNormalClient(opt *util.ClientOption) *NormalClient {
+	var (
+		s      = opt.S
+		teamId = opt.TeamId
+		seatId = opt.SeatId
+		p, _   = util.GetProfile(s)
+	)
+
+	client := &NormalClient{
 		player: &proto.TableInfo_Player{
 			TeamId:  teamId,
-			End:     false,
+			SeatId:  seatId,
 			Profile: util.ConvProfileToProtoProfile(p),
 		},
 		s: s,
-		//updatedAt: z.GetTime(),
-		table:  table,
-		frames: make(map[int64][]*proto.Action, 0),
-		speed:  1000,
 	}
 
-	return c
+	client.ResetClient()
+
+	return client
 }
 
 func (c *NormalClient) SetLastFrame(frameId int64) {
@@ -62,7 +76,6 @@ func (c *NormalClient) SaveFrame(frameId int64, msg *proto.UpdateFrame) {
 	}
 	uf = append(uf, action)
 	c.frames[frameId] = uf
-	c.lastUpdateAt = z.GetTime()
 }
 
 func (c *NormalClient) GetFrame(frameId int64) []*proto.Action {

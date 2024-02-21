@@ -194,7 +194,6 @@ class NetNodeGame extends NetNode {
     resumeTable() {
         let control = uiManager.getUI(UIID.UIControl) as UIControl;
         let frameId = control ? control.curFrame : 0;
-
         let buf = ResumeTable.encode({frameId:frameId}).finish();
         let rspObject: CallbackObject = {
             target: this,

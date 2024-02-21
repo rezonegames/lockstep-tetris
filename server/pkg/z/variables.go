@@ -26,38 +26,11 @@ func (is *Intslice) UnmarshalBSON(data []byte) error {
 	return nil
 }
 
-// NilError nil error
+// NilError nil error for db
 type NilError struct {
 	Msg string
 }
 
 func (e NilError) Error() string {
 	return fmt.Sprintf("Error nil %s", e.Msg)
-}
-
-// ValidError nil error
-type ValidError struct {
-	Msg string
-}
-
-func (e ValidError) Error() string {
-	return fmt.Sprintf("Valid err %s", e.Msg)
-}
-
-// OtherError normal error
-type OtherError struct {
-	Msg string
-}
-
-func (e OtherError) Error() string {
-	return fmt.Sprintf("Other err %s", e.Msg)
-}
-
-// LockError lock error
-type LockError struct {
-	Key string
-}
-
-func (e LockError) Error() string {
-	return fmt.Sprintf("Lock Error %s", e.Key)
 }

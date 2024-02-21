@@ -8,6 +8,14 @@ import (
 
 var log = logrus.New()
 
+var (
+	Info  = log.Infof
+	Warn  = log.Warnf
+	Debug = log.Debugf
+	Error = log.Errorf
+	Fatal = log.Fatal
+)
+
 func InitLog() {
 	if z.IsLocal() {
 		log.Out = os.Stdout
@@ -23,29 +31,8 @@ func InitLog() {
 	}
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	Info("The log ok")
-
 }
 
 func GetLogger() *logrus.Logger {
 	return log
-}
-
-func Info(format string, v ...interface{}) {
-	log.Infof(format, v...)
-}
-
-func Warn(format string, v ...interface{}) {
-	log.Warnf(format, v...)
-}
-
-func Debug(format string, v ...interface{}) {
-	log.Debugf(format, v...)
-}
-
-func Error(format string, v ...interface{}) {
-	log.Errorf(format, v...)
-}
-
-func Fatal(v ...interface{}) {
-	log.Fatal(v...)
 }

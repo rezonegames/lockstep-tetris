@@ -34,7 +34,7 @@ func StartMongo(ctx context.Context, uri string, db string, secondary bool) {
 
 func StartRedis(ctx context.Context, host string, db int, auth string) {
 	log.Info("[StartRedis] ready connecting")
-	
+
 	client, err := zredis.NewClient(ctx, &redis.Options{
 		Addr: host,
 		DB:   db,
