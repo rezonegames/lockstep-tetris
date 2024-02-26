@@ -64,7 +64,7 @@ func (w *QuickWaiter) AfterInit() {
 	})
 }
 
-// Dismiss 解散
+// CheckAndDismiss 解散
 func (w *QuickWaiter) CheckAndDismiss() {
 	// 中途有离开或者10秒倒计时有玩家没有准备，返回到队列
 	if len(w.readys) == len(w.sessions) {

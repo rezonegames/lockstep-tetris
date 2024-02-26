@@ -1,7 +1,6 @@
 package room
 
 import (
-	"github.com/lonng/nano/session"
 	"tetris/internal/game/util"
 	"tetris/pkg/log"
 )
@@ -9,11 +8,6 @@ import (
 // 桌子
 type QuickTable struct {
 	*Table
-}
-
-func (t *QuickTable) KickUser(s *session.Session, kickUser int64) error {
-	//TODO implement me
-	panic("implement me")
 }
 
 func NewQuickTable(opt *util.TableOption) *QuickTable {

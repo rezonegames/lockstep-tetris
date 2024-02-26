@@ -1,7 +1,7 @@
 import {_decorator, Label, Node, UITransform, Vec3, instantiate} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {
-    GameStateResp, KickUser, KickUserResp,
+    OnGameState, KickUser, KickUserResp, LeaveTable, LeaveTableResp,
     Ready,
     Room, SitDown, SitDownResp, StandUp, StandUpResp, TableInfo, TableInfo_Player
 } from "db://assets/Script/example/proto/client";
@@ -27,8 +27,8 @@ export default class UITable extends UIView {
     seatNodeMap: { [key: number]: Node } = {}
 
     tableInfo: TableInfo
-    seatPlayer: {[key: number]: TableInfo_Player} = {};
-    oldSeatPlayer: {[key: number]: TableInfo_Player} = {};
+    seatPlayer: { [key: number]: TableInfo_Player } = {};
+    oldSeatPlayer: { [key: number]: TableInfo_Player } = {};
 
     public onOpen(fromUI: number, ...args: any): void {
         super.onOpen(fromUI, ...args);
@@ -80,10 +80,10 @@ export default class UITable extends UIView {
     }
 
     onBackToRoom() {
-        channel.gameReqest("r.standup", StandUp.encode({}).finish(), {
+        channel.gameReqest("r.leavetable", LeaveTable.encode({}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = StandUpResp.decode(new Uint8Array(data.body));
+                let resp = LeaveTableResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
                     uiManager.close();
                 }
@@ -119,15 +119,15 @@ export default class UITable extends UIView {
     }
 
     onState(event: string, args: any) {
-        let gameState = args as GameStateResp;
+        let gameState = args as OnGameState;
         this.refreshTableInfo(gameState.tableInfo);
     }
 
     clickSeat(seatId: number) {
         let [oldPlayer, player, node] = [this.oldSeatPlayer[seatId], this.seatPlayer[seatId], this.seatNodeMap[seatId]];
         let layout = node.getChildByName("Layout");
-        let [label, kickBtn, sitBtn, my] = [node.getChildByName("Label"), layout.getChildByName("Button"),layout.getChildByName("Button-001"), this.seatPlayer[oo.storage.getUser()]];
-        if(!player) {
+        let [label, kickBtn, sitBtn, my] = [node.getChildByName("Label"), layout.getChildByName("Button"), layout.getChildByName("Button-001"), this.seatPlayer[oo.storage.getUser()]];
+        if (!player) {
             label.active = false;
             layout.active = true;
             sitBtn.active = true;
@@ -135,7 +135,7 @@ export default class UITable extends UIView {
             return;
         }
 
-        if (oldPlayer && (oldPlayer.profile?.userId == player.profile?.userId)) {
+        if (oldPlayer && (oldPlayer.profile?.userId == player.profile?.userId || player.profile?.userId == my.profile?.userId)) {
             return;
         }
 
@@ -163,7 +163,7 @@ export default class UITable extends UIView {
         }).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = KickUserResp.decode(new Uint8Array(data.body));
+                let resp = KickUserResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
                     // 坐下动画
                 }
@@ -180,7 +180,7 @@ export default class UITable extends UIView {
         }).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = SitDownResp.decode(new Uint8Array(data.body));
+                let resp = SitDownResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
                     // 坐下动画
                 }

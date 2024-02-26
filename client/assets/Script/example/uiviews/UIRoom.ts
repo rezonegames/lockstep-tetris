@@ -3,7 +3,7 @@ import {UIView} from "db://assets/Script/core/ui/UIView";
 import {
     CreateTable, CreateTableResp,
     GetRoomInfo,
-    GetRoomInfoResp, Leave, LeaveResp, Ready,
+    GetRoomInfoResp, JoinTable, JoinTableResp, Leave, LeaveResp, Ready,
     Room, SitDown, SitDownResp, TableInfo
 } from "db://assets/Script/example/proto/client";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
@@ -60,7 +60,7 @@ export default class UIRoom extends UIView {
         channel.gameReqest("r.leave", Leave.encode({roomId: ""}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = LeaveResp.decode(new Uint8Array(data.body));
+                let resp = LeaveResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
                     uiManager.close();
                 }
@@ -73,10 +73,10 @@ export default class UIRoom extends UIView {
         channel.gameReqest("r.createtable", CreateTable.encode({tableId, password}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = CreateTableResp.decode(new Uint8Array(data.body));
+                let resp = CreateTableResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
-                    let table = resp.table;
-                    uiManager.open(UIID.UITable, table);
+                    let tableInfo = resp.table
+                    this.joinTable(tableInfo)
                 }
             }
         });
@@ -85,9 +85,9 @@ export default class UIRoom extends UIView {
     refreshTableList(tableList: TableInfo[]) {
         // 以三个为一组，再次分组
         let groupedLists = [];
-        // tableList = tableList.sort( (a: TableInfo, b: TableInfo):Boolean => {
-        //     return a.tableId > b.tableId;
-        // })
+        tableList = tableList.sort( (a: TableInfo, b: TableInfo) => {
+            return a.createTime - b.createTime;
+        })
         for (let i = 0; i < tableList.length; i += 5) {
             let group = tableList.slice(i, i + 5);
             groupedLists.push(group);
@@ -113,7 +113,7 @@ export default class UIRoom extends UIView {
 
                     tableNode.getChildByName("Button").off("click");
                     tableNode.getChildByName("Button").on("click", () => {
-                        uiManager.open(UIID.UITable, info);
+                        this.joinTable(info);
                     })
 
                     tableNode.active = true;
@@ -127,6 +127,18 @@ export default class UIRoom extends UIView {
         this.listView.reload();
     }
 
+    joinTable(tableInfo: TableInfo) {
+        channel.gameReqest("r.jointable", JoinTable.encode({tableId: tableInfo.tableId}).finish(), {
+            target: this,
+            callback: (cmd: number, data: any) => {
+                let resp = JoinTableResp.decode(data.body);
+                if (resp.code == ErrorCode.OK) {
+                    uiManager.open(UIID.UITable, tableInfo);
+                }
+            }
+        });
+    }
+
     getRoomInfo() {
         if(!uiManager.isTopUI(UIID.UIRoom)) {
             return;
@@ -135,7 +147,7 @@ export default class UIRoom extends UIView {
         channel.gameReqest("r.getroominfo", GetRoomInfo.encode({roomId: this.roomId}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = GetRoomInfoResp.decode(new Uint8Array(data.body));
+                let resp = GetRoomInfoResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
                     let room = resp.room;
                     let [tableList, name, roomId, count] = [room?.tableList, room?.name, room?.roomId, room?.playerCount];

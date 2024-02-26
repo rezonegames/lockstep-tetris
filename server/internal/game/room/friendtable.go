@@ -54,5 +54,5 @@ func (f *FriendTable) KickUser(s *session.Session, kickUser int64) error {
 	if client.GetSeatId() != 0 {
 		return errors.New("player permission error")
 	}
-	return f.StandUp(kickClient.GetSession())
+	return f.Leave(kickClient.GetSession())
 }

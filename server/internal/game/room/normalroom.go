@@ -68,6 +68,7 @@ func (r *Room) Run() {
 // BeforeShutdown 清理一下roundsession缓存
 func (r *Room) BeforeShutdown() {
 	for _, uid := range r.group.Members() {
+		log.Info(r.Format("[BeforeShutdown] leave user %d", uid))
 		models.RemoveRoundSession(uid)
 	}
 	log.Info(r.Format("[BeforeShutdown]"))
@@ -115,7 +116,7 @@ func (r *Room) Leave(s *session.Session) error {
 			goto EXIT
 		}
 
-		err = table.StandUp(s)
+		err = table.Leave(s)
 		if err != nil {
 			// 数据不能移除，因为要断线重连
 			log.Error(r.Format("[Leave] user %d err %+v", uid, err))

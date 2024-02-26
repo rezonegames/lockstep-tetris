@@ -4,10 +4,9 @@ import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {oo} from "db://assets/Script/core/oo";
 import {
     Ready,
-    ReadyResp,
     Leave,
     LeaveResp,
-    GameStateResp,
+    OnGameState,
     Room,
     TableInfo_Player
 } from "db://assets/Script/example/proto/client";
@@ -64,7 +63,7 @@ export default class UIWaiting extends UIView {
     }
 
     public onState(event: string, args: any) {
-        let gameState = args as GameStateResp;
+        let gameState = args as OnGameState;
 
         switch (gameState.state) {
             case GameState.WAIT:
@@ -140,7 +139,7 @@ export default class UIWaiting extends UIView {
         let respObject: CallbackObject = {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = LeaveResp.decode(new Uint8Array(data.body));
+                let resp = LeaveResp.decode(data.body);
                 oo.log.logNet(resp, "leave返回");
                 if (resp.code == ErrorCode.OK) {
                     uiManager.close();

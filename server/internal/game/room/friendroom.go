@@ -69,6 +69,8 @@ func (f *FriendRoom) AfterInit() {
 
 			t := NewTable(opt)
 			f.tables[tableId] = t
+
+			time.Sleep(10 * time.Millisecond)
 		}
 	})
 }

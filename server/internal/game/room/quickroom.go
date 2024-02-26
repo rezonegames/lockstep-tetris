@@ -134,7 +134,7 @@ func (r *QuickRoom) Join(s *session.Session) error {
 	// 加入队列
 	r.waitMap[uid] = now
 
-	return s.Push("onState", &proto.GameStateResp{
+	return s.Push("onState", &proto.OnGameState{
 		State: proto.GameState_WAIT,
 	})
 }

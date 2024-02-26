@@ -37,15 +37,16 @@ type TableEntity interface {
 	WaiterEntity() WaiterEntity
 	Entity(uid int64) ClientEntity
 	ChangeState(state proto.TableState)
-
-	// 协议
 	Ready(s *session.Session) error
 	LoadRes(s *session.Session, msg *proto.LoadRes) error
 	Update(s *session.Session, msg *proto.UpdateFrame) error
 	ResumeTable(s *session.Session, roundId int32, frameId int64) error
+	Leave(s *session.Session) error
+	Join(s *session.Session) error
 	StandUp(s *session.Session) error
 	SitDown(s *session.Session, seatId int32, password string) error
 	KickUser(s *session.Session, kickUser int64) error
+	GetSeatUser(seatId int32) (ClientEntity, bool)
 }
 
 type WaiterOption struct {
@@ -67,6 +68,7 @@ type ClientOption struct {
 	S      *session.Session
 	TeamId int32
 	SeatId int32
+	Table  TableEntity
 }
 type ClientEntity interface {
 	GetPlayer() *proto.TableInfo_Player
@@ -80,10 +82,9 @@ type ClientEntity interface {
 	ResetClient()
 	GetSeatId() int32
 	SetSeatId(seatId int32)
-
-	// 帧相关的数据
 	SaveFrame(frameId int64, msg *proto.UpdateFrame)
 	GetFrame(frameId int64) []*proto.Action
 	SetLastFrame(frameId int64)
 	GetLastFrame() int64
+	AfterInit()
 }

@@ -3,8 +3,8 @@ import {UIView} from "db://assets/Script/core/ui/UIView";
 import {
     Action,
     LoadRes,
-    OnFrame,
-    OnFrame_Player,
+    Frame,
+    Frame_Player,
     OnFrameList,
     Room,
     TableInfo,
@@ -42,7 +42,7 @@ export default class UIControl extends UIView {
     // 帧数据
     curFrame: number = 0;
     preFrameTime: number = 0;
-    frameList: OnFrame[] = [];
+    frameList: Frame[] = [];
 
 
     public onOpen(fromUI: number, ...args) {
@@ -209,7 +209,7 @@ export default class UIControl extends UIView {
     }
 
     // 解析网络过来的操作数据
-    unserialize(tetris: Tetris, msg: OnFrame_Player) {
+    unserialize(tetris: Tetris, msg: Frame_Player) {
         let actionList = msg.actionList;
         actionList.forEach((action: Action) => {
             let valList = action.valList;
@@ -304,7 +304,7 @@ export default class UIControl extends UIView {
 
     }
 
-    process(frame: OnFrame) {
+    process(frame: Frame) {
         // 第一帧，初始化tetirs
         if (frame.frameId == 0) {
             for (const [uid, t] of Object.entries(this.tetrisManager)) {
@@ -312,7 +312,7 @@ export default class UIControl extends UIView {
                 t.player.reset();
             }
         } else {
-            frame.playerList.forEach((player: OnFrame_Player) => {
+            frame.playerList.forEach((player: Frame_Player) => {
                 let t = this.tetrisManager[player.userId];
                 if (t.player) {
                     this.unserialize(t, player);

@@ -27,7 +27,6 @@ type Table struct {
 	lock          sync.RWMutex
 	waiter        util.WaiterEntity
 	room          util.RoomEntity
-	begin         time.Time
 	state         proto.TableState
 	chState       chan proto.TableState
 	chRoundOver   chan bool
@@ -40,6 +39,7 @@ type Table struct {
 	password      string
 	seatTeam      map[int32]int32
 	roundCounter  int32
+	createTime    int64
 }
 
 func NewNormalTable(opt *util.TableOption) *Table {
@@ -50,6 +50,7 @@ func NewNormalTable(opt *util.TableOption) *Table {
 		password = opt.Password
 		teamId   int32
 		i        int32
+		now      = z.NowUnixMilli()
 	)
 
 	table := &Table{
@@ -59,7 +60,7 @@ func NewNormalTable(opt *util.TableOption) *Table {
 		conf:          conf,
 		teamGroupSize: conf.Pvp / conf.Divide,
 		room:          room,
-		begin:         z.GetTime(),
+		createTime:    now,
 		chState:       make(chan proto.TableState, 10),
 		chRoundOver:   make(chan bool, 0),
 		chEnd:         make(chan bool, 0),
@@ -157,14 +158,13 @@ func (t *Table) checkState() {
 
 // dismiss 解散
 func (t *Table) dismiss() {
-	// 解散了
 	for _, v := range t.clients {
 		var (
 			uid = v.GetUserId()
 			s   = v.GetSession()
 			err error
 		)
-		err = t.StandUp(s)
+		err = t.Leave(s)
 		if err != nil {
 			log.Info(t.Format("[dismiss] player %d stand up err %+v", uid, err))
 		}
@@ -192,16 +192,16 @@ func (t *Table) broadcastFrame() {
 			continue
 		}
 
-		msg := &proto.OnFrameList{FrameList: make([]*proto.OnFrame, 0)}
+		msg := &proto.OnFrameList{FrameList: make([]*proto.Frame, 0)}
 		lastFrameId := v.GetLastFrame()
 
 		var i int64
 		for i = lastFrameId; i <= t.nextFrameId; i++ {
 
-			frame := &proto.OnFrame{
+			frame := &proto.Frame{
 				FrameId:    i,
 				FrameTime:  t.frameTimes[i],
-				PlayerList: make([]*proto.OnFrame_Player, 0),
+				PlayerList: make([]*proto.Frame_Player, 0),
 			}
 
 			if i == 0 {
@@ -209,7 +209,7 @@ func (t *Table) broadcastFrame() {
 			} else {
 				for _, v := range t.clients {
 					if al := v.GetFrame(i); len(al) > 0 {
-						frame.PlayerList = append(frame.PlayerList, &proto.OnFrame_Player{
+						frame.PlayerList = append(frame.PlayerList, &proto.Frame_Player{
 							UserId:     v.GetUserId(),
 							ActionList: al,
 						})
@@ -300,7 +300,7 @@ func (t *Table) setState(state proto.TableState) {
 		return
 	}
 
-	err = t.group.Broadcast("onState", &proto.GameStateResp{
+	err = t.group.Broadcast("onState", &proto.OnGameState{
 		State:     proto.GameState_INGAME,
 		TableInfo: tableInfo,
 	})
@@ -403,15 +403,24 @@ func (t *Table) RoundOver() {
 	//panic(t.Format("[RoundOver]"))
 }
 
+func (t *Table) GetSeatUser(seatId int32) (util.ClientEntity, bool) {
+
+	for _, client := range t.clients {
+
+		if client.GetSeatId() == seatId {
+			return client, true
+		}
+	}
+
+	return nil, false
+}
+
 // StandUp 在游戏中退出，要保证重连能继续，不能把所有的资源都删掉
 func (t *Table) StandUp(s *session.Session) error {
-
 	var (
 		shouldLeaveTable = false
 		uid              = s.UID()
 	)
-
-	defer t.group.Leave(s)
 
 	log.Debug(t.Format("[StandUp] %d", uid))
 
@@ -452,6 +461,8 @@ func (t *Table) StandUp(s *session.Session) error {
 	if shouldLeaveTable {
 		models.RemoveTableId(uid)
 		delete(t.clients, uid)
+		// 为了通知
+		t.ChangeState(t.state)
 		return nil
 	}
 
@@ -460,44 +471,43 @@ func (t *Table) StandUp(s *session.Session) error {
 
 // SitDown 坐下，可以根据座位号
 func (t *Table) SitDown(s *session.Session, seatId int32, password string) error {
+	var (
+		err                  error
+		uid                  = s.UID()
+		teamId               = t.seatTeam[seatId]
+		tableId              = t.tableId
+		roundId              = t.roundCounter
+		client, isChangeSeat = t.clients[uid]
+	)
+
+	if !t.group.Contains(uid) {
+		return errors.New("player not join table")
+	}
+
 	if password != t.password {
 		return errors.New("password error")
 	}
-	if t.group.Count() >= int(t.conf.Pvp) {
+
+	if !isChangeSeat && t.group.Count() > int(t.conf.Pvp) {
 		return errors.New("table is full !!")
 	}
 	if t.state > proto.TableState_WAITREADY {
 		return errors.New("table start!!")
 	}
 
-	var (
-		err     error
-		uid     = s.UID()
-		teamId  = t.seatTeam[seatId]
-		tableId = t.tableId
-		roundId = t.roundCounter
-		client  util.ClientEntity
-		ok      bool
-	)
-
 	err = models.SetTableId(uid, tableId, roundId)
 	if err != nil {
 		return err
 	}
 
-	err = t.group.Add(s)
-	if err != nil {
-		return err
-	}
+	if !isChangeSeat {
+		var opt = &util.ClientOption{
+			S:      s,
+			TeamId: teamId,
+			SeatId: seatId,
+			Table:  t,
+		}
 
-	var opt = &util.ClientOption{
-		S:      s,
-		TeamId: teamId,
-		SeatId: seatId,
-	}
-
-	client, ok = t.clients[uid]
-	if !ok {
 		client = NewClient(opt)
 		t.clients[uid] = client
 	} else {
@@ -510,6 +520,21 @@ func (t *Table) SitDown(s *session.Session, seatId int32, password string) error
 
 	log.Info(t.Format("[SitDown] player %d team %d seat %d", uid, teamId, seatId))
 	return nil
+}
+
+func (t *Table) Leave(s *session.Session) error {
+	defer func(group *nano.Group, s *session.Session) {
+		err := group.Leave(s)
+		if err != nil {
+
+		}
+	}(t.group, s)
+
+	return t.StandUp(s)
+}
+
+func (t *Table) Join(s *session.Session) error {
+	return t.group.Add(s)
 }
 
 func (t *Table) GetInfo() *proto.TableInfo {
@@ -533,6 +558,7 @@ func (t *Table) GetInfo() *proto.TableInfo {
 		RandSeed:    t.randSeed,
 		HasPassword: t.password != "",
 		RoundId:     t.roundCounter,
+		CreateTime:  t.createTime,
 	}
 }
 
@@ -560,4 +586,9 @@ func (t *Table) ResumeTable(s *session.Session, roundId int32, frameId int64) er
 	client = t.Entity(uid)
 	client.Reconnect(s, lastFrameId)
 	return nil
+}
+
+func (t *Table) KickUser(s *session.Session, kickUser int64) error {
+	//TODO implement me
+	panic("implement me")
 }

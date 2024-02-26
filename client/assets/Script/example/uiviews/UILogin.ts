@@ -48,7 +48,8 @@ export default class UILogin extends UIView {
 
         oo.http.server = `http://192.168.8.27:8000`;
         oo.http.server = `http://192.168.3.23:8000`;
-        // oo.http.server = `http://127.0.0.1:8000`;
+        oo.http.server = `http://192.168.3.69:8000`;
+        oo.http.server = `http://127.0.0.1:8000`;
 
         channel.gameCreate();
     }

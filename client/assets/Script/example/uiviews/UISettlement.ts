@@ -2,7 +2,7 @@ import {_decorator, Label, Layout, Node} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {
-    GameStateResp,
+    OnGameState,
     Leave,
     LeaveResp,
     Room,
@@ -38,7 +38,7 @@ export default class UISettlement extends UIView {
 
     public onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
-        let resp = args[0] as GameStateResp;
+        let resp = args[0] as OnGameState;
         this.tableInfo = resp.tableInfo;
         // 更新列表
         let players: TableInfo_Player[] = [];
@@ -81,7 +81,7 @@ export default class UISettlement extends UIView {
         channel.gameReqest("r.leave", Leave.encode({roomId: ""}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = LeaveResp.decode(new Uint8Array(data.body));
+                let resp = LeaveResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
                     uiManager.replace(UIID.UIHall);
                 }
@@ -93,7 +93,7 @@ export default class UISettlement extends UIView {
         channel.gameReqest("r.standup", StandUp.encode({}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = StandUpResp.decode(new Uint8Array(data.body));
+                let resp = StandUpResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
                     uiManager.replace(UIID.UIHall);
                     uiManager.open(UIID.UIRoom, this.tableInfo.room)

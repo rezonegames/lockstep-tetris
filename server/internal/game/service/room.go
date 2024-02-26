@@ -198,14 +198,12 @@ EXIT:
 	})
 }
 
-func (r *RoomService) SitDown(s *session.Session, msg *proto.SitDown) error {
+func (r *RoomService) JoinTable(s *session.Session, msg *proto.JoinTable) error {
 	var (
-		rs       *models.RoundSession
-		err      error
-		tableId  = msg.TableId
-		password = msg.Password
-		seatId   = msg.SeatId
-		table    util.TableEntity
+		rs      *models.RoundSession
+		err     error
+		tableId = msg.TableId
+		table   util.TableEntity
 	)
 
 	rs, err = models.GetRoundSession(s.UID())
@@ -217,6 +215,76 @@ func (r *RoomService) SitDown(s *session.Session, msg *proto.SitDown) error {
 	if err != nil {
 		goto EXIT
 	}
+	err = table.Join(s)
+	if err != nil {
+		goto EXIT
+	}
+	return s.Response(&proto.JoinTableResp{
+		Code: proto.ErrorCode_OK,
+	})
+
+EXIT:
+	return s.Response(&proto.JoinTableResp{
+		Code: proto.ErrorCode_JoinTableError,
+	})
+}
+
+func (r *RoomService) LeaveTable(s *session.Session, _ *proto.LeaveTable) error {
+	var (
+		table util.TableEntity
+		err   error
+	)
+
+	table, err = r.getTableFromSession(s)
+	if err != nil {
+		// 解散等原因
+		return s.Response(&proto.LeaveTableResp{
+			Code: proto.ErrorCode_OK,
+		})
+	}
+	err = table.Leave(s)
+	if err != nil {
+		goto EXIT
+	}
+
+	return s.Response(&proto.LeaveTableResp{
+		Code: proto.ErrorCode_OK,
+	})
+
+EXIT:
+	return s.Response(&proto.LeaveTableResp{
+		Code: proto.ErrorCode_LeaveTableError,
+	})
+}
+
+func (r *RoomService) SitDown(s *session.Session, msg *proto.SitDown) error {
+	var (
+		rs         *models.RoundSession
+		err        error
+		tableId    = msg.TableId
+		password   = msg.Password
+		seatId     = msg.SeatId
+		table      util.TableEntity
+		seatClient util.ClientEntity
+		ok         bool
+	)
+
+	rs, err = models.GetRoundSession(s.UID())
+	if err != nil {
+		goto EXIT
+	}
+
+	table, err = r.Entity(rs.RoomId).Entity(tableId)
+	if err != nil {
+		goto EXIT
+	}
+
+	seatClient, ok = table.GetSeatUser(seatId)
+	if ok {
+		seatClient.GetSession()
+		goto EXIT
+	}
+
 	err = table.SitDown(s, seatId, password)
 	if err != nil {
 		goto EXIT
@@ -322,20 +390,27 @@ func (r *RoomService) ResumeTable(s *session.Session, msg *proto.ResumeTable) er
 	}
 
 	// todo：再取一次redis
-	rs, _ = models.GetRoundSession(uid)
+	rs, err = models.GetRoundSession(uid)
+	if err != nil {
+		goto EXIT
+	}
+
 	err = table.ResumeTable(s, rs.RoundId, frameId)
 	if err != nil {
-		return s.Response(&proto.ResumeTableResp{
-			Code: proto.ErrorCode_UnknownError,
-		})
+		goto EXIT
 	}
 
 	// 包括桌子信息与帧信息
 	return s.Response(&proto.ResumeTableResp{
 		Code: proto.ErrorCode_OK,
-		State: &proto.GameStateResp{
+		State: &proto.OnGameState{
 			State:     proto.GameState_INGAME,
 			TableInfo: table.GetInfo(),
 		},
+	})
+
+EXIT:
+	return s.Response(&proto.ResumeTableResp{
+		Code: proto.ErrorCode_UnknownError,
 	})
 }

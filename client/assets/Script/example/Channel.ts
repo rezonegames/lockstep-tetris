@@ -10,11 +10,11 @@ import {
 import {NetNode} from "db://assets/Script/core/network/NetNode";
 import {oo} from "db://assets/Script/core/oo";
 import {
-    GameStateResp,
+    OnGameState,
     LoginToGame,
     LoginToGameResp,
     OnFrameList,
-    ResumeTable, ResumeTableResp
+    ResumeTable, ResumeTableResp, OnNotify
 } from "db://assets/Script/example/proto/client";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {Message} from "db://assets/Script/example/nano/message";
@@ -83,6 +83,7 @@ const route2cmd = (route: string): number => {
         "onState": 100,
         "onFrame": 101,
         "onItemChange": 102,
+        "onNotify": 102,
     }
     return v[route];
 };
@@ -168,7 +169,7 @@ class NetNodeGame extends NetNode {
         let rspObject: CallbackObject = {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = LoginToGameResp.decode(new Uint8Array(data.body));
+                let resp = LoginToGameResp.decode(data.body);
                 oo.log.logNet(resp, "登录游戏账号");
                 if (resp.code == ErrorCode.OK) {
                     // 重连，不去切换ui
@@ -198,7 +199,7 @@ class NetNodeGame extends NetNode {
         let rspObject: CallbackObject = {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = ResumeTableResp.decode(new Uint8Array(data.body));
+                let resp = ResumeTableResp.decode(data.body);
 
                 switch (resp.code) {
                     case ErrorCode.TableDismissError:
@@ -241,6 +242,7 @@ class NetNodeGame extends NetNode {
                 break;
             case Package.TYPE_DATA:
                 let msg = Message.decode(p.body);
+                msg.body = new Uint8Array(msg.body);
                 super.onMessage(msg);
                 break;
             case Package.TYPE_HEARTBEAT:
@@ -294,9 +296,9 @@ export class NetChannelManager {
         this.game.init(new WebSock(), new GameProtocol(), new NetTips());
         oo.tcp.setNetNode(this.game, NetChannelType.Game);
 
-        //  根据游戏状态切换界面
+        // 根据游戏状态切换界面
         this.gameAddListener("onState", (cmd, data: any) => {
-            let resp = GameStateResp.decode(new Uint8Array(data.body));
+            let resp = OnGameState.decode(data.body);
             oo.log.logNet(resp, "onState");
             switch (resp.state) {
                 case GameState.INGAME:
@@ -321,10 +323,14 @@ export class NetChannelManager {
             }
             oo.event.raiseEvent("onState", resp);
         }, this);
+        
+        this.gameAddListener("onNotify",(cmd, data: any)=>{
+            let resp = OnNotify.decode(data.body);
+        }, this)
 
         // 游戏内状态同步
         this.gameAddListener("onFrame", (cmd, data: any) => {
-            let resp = OnFrameList.decode(new Uint8Array(data.body));
+            let resp = OnFrameList.decode(data.body);
             EventMgr.raiseEvent("onFrame", resp);
         }, this);
     }

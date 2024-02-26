@@ -50,7 +50,7 @@ message TableInfo {
   int64 randSeed = 8;
   bool hasPassword = 10;
   int32 roundId = 11;
-
+  int64 createTime = 12;
   // 结算本局时用的
   map<int64, OnItemChange> playerItems = 9;
 }
@@ -74,6 +74,22 @@ message Action {
   int64 to = 3;
   int64 from = 4;
 }
+
+message Frame {
+  message Player {
+    int64 userId = 1;
+    repeated Action actionList = 2;
+  }
+
+  int64 frameId = 1;
+  int64 frameTime = 2;
+
+  repeated Player playerList = 3;
+  // 只有第一帧的时候返回500个
+  repeated int32 pieceList = 4;
+}
+
+/////////////////////////////////////////////////
 
 message LoginToGame {
   int64 userId = 1;
@@ -138,6 +154,20 @@ message StandUpResp {
   ErrorCode code = 1;
 }
 
+message JoinTable {
+  string tableId = 1;
+}
+
+message JoinTableResp {
+  ErrorCode code = 1;
+}
+
+message LeaveTable {}
+
+message LeaveTableResp {
+  ErrorCode code = 1;
+}
+
 message KickUser {
   int64 userId = 1;
 }
@@ -166,10 +196,6 @@ message LeaveResp {
 message Ready {
 }
 
-message ReadyResp {
-  ErrorCode code = 1;
-}
-
 message LoadRes {
   int32 current = 1;
 }
@@ -180,42 +206,35 @@ message ResumeTable {
 
 message ResumeTableResp {
   ErrorCode code = 1;
-  GameStateResp state = 2;
+  OnGameState state = 2;
 }
 
-// 在每一个步骤，下发游戏状态
-message GameStateResp {
+// UpdateFrame 客户端每个动作
+message UpdateFrame {
+  Action action = 1;
+}
+
+//////////////////////////////////////////////////////////////
+
+// OnGameState 在每一个步骤，下发游戏状态，客户端可根据状态切换页面
+message OnGameState {
   ErrorCode code = 1;
   GameState state = 3;
   TableInfo tableInfo = 5;
 }
 
-
-message UpdateFrame {
-  Action action = 1;
-}
-
-message OnFrame {
-  message Player {
-    int64 userId = 1;
-    repeated Action actionList = 2;
-  }
-
-  int64 frameId = 1;
-  int64 frameTime = 2;
-
-  repeated Player playerList = 3;
-  // 只有第一帧的时候返回500个
-  repeated int32 pieceList = 4;
-}
-
 message OnFrameList {
-  repeated OnFrame frameList = 1;
+  repeated Frame frameList = 1;
 }
 
-// 道具变化
+// OnItemChange 道具变化
 message OnItemChange {
   repeated Item itemList = 1;
   string reason = 2;
   int64 to = 3;
+}
+
+// OnNotify 通知其它类型消息
+message OnNotify {
+
 }

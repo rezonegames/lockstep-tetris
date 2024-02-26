@@ -91,7 +91,7 @@ func client(deviceId, rid string) {
 
 	// 状态变化
 	c.On("onState", func(data interface{}) {
-		v := proto2.GameStateResp{}
+		v := proto2.OnGameState{}
 		ss.Unmarshal(data.([]byte), &v)
 		state = v.State
 		tableInfo := v.TableInfo

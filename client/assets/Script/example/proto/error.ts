@@ -18,5 +18,7 @@ export enum ErrorCode {
   StandUpErrpr = 11,
   CreateTableError = 12,
   KickUserError = 13,
+  LeaveTableError = 14,
+  JoinTableError = 15,
   UNRECOGNIZED = -1,
 }

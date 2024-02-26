@@ -30,6 +30,7 @@ export interface TableInfo {
   randSeed: number;
   hasPassword: boolean;
   roundId: number;
+  createTime: number;
   /** 结算本局时用的 */
   playerItems: { [key: number]: OnItemChange };
 }
@@ -98,6 +99,19 @@ export interface Action {
   from: number;
 }
 
+export interface Frame {
+  frameId: number;
+  frameTime: number;
+  playerList: Frame_Player[];
+  /** 只有第一帧的时候返回500个 */
+  pieceList: number[];
+}
+
+export interface Frame_Player {
+  userId: number;
+  actionList: Action[];
+}
+
 export interface LoginToGame {
   userId: number;
 }
@@ -159,6 +173,21 @@ export interface StandUpResp {
   code: ErrorCode;
 }
 
+export interface JoinTable {
+  tableId: string;
+}
+
+export interface JoinTableResp {
+  code: ErrorCode;
+}
+
+export interface LeaveTable {
+}
+
+export interface LeaveTableResp {
+  code: ErrorCode;
+}
+
 export interface KickUser {
   userId: number;
 }
@@ -187,10 +216,6 @@ export interface LeaveResp {
 export interface Ready {
 }
 
-export interface ReadyResp {
-  code: ErrorCode;
-}
-
 export interface LoadRes {
   current: number;
 }
@@ -201,42 +226,34 @@ export interface ResumeTable {
 
 export interface ResumeTableResp {
   code: ErrorCode;
-  state: GameStateResp | undefined;
+  state: OnGameState | undefined;
 }
 
-/** 在每一个步骤，下发游戏状态 */
-export interface GameStateResp {
+/** UpdateFrame 客户端每个动作 */
+export interface UpdateFrame {
+  action: Action | undefined;
+}
+
+/** OnGameState 在每一个步骤，下发游戏状态，客户端可根据状态切换页面 */
+export interface OnGameState {
   code: ErrorCode;
   state: GameState;
   tableInfo: TableInfo | undefined;
 }
 
-export interface UpdateFrame {
-  action: Action | undefined;
-}
-
-export interface OnFrame {
-  frameId: number;
-  frameTime: number;
-  playerList: OnFrame_Player[];
-  /** 只有第一帧的时候返回500个 */
-  pieceList: number[];
-}
-
-export interface OnFrame_Player {
-  userId: number;
-  actionList: Action[];
-}
-
 export interface OnFrameList {
-  frameList: OnFrame[];
+  frameList: Frame[];
 }
 
-/** 道具变化 */
+/** OnItemChange 道具变化 */
 export interface OnItemChange {
   itemList: Item[];
   reason: string;
   to: number;
+}
+
+/** OnNotify 通知其它类型消息 */
+export interface OnNotify {
 }
 
 function createBaseItem(): Item {
@@ -363,6 +380,7 @@ function createBaseTableInfo(): TableInfo {
     randSeed: 0,
     hasPassword: false,
     roundId: 0,
+    createTime: 0,
     playerItems: {},
   };
 }
@@ -398,6 +416,9 @@ export const TableInfo = {
     }
     if (message.roundId !== 0) {
       writer.uint32(88).int32(message.roundId);
+    }
+    if (message.createTime !== 0) {
+      writer.uint32(96).int64(message.createTime);
     }
     Object.entries(message.playerItems).forEach(([key, value]) => {
       TableInfo_PlayerItemsEntry.encode({ key: key as any, value }, writer.uint32(74).fork()).ldelim();
@@ -487,6 +508,13 @@ export const TableInfo = {
           }
 
           message.roundId = reader.int32();
+          continue;
+        case 12:
+          if (tag !== 96) {
+            break;
+          }
+
+          message.createTime = longToNumber(reader.int64() as Long);
           continue;
         case 9:
           if (tag !== 74) {
@@ -1096,6 +1124,130 @@ export const Action = {
   },
 };
 
+function createBaseFrame(): Frame {
+  return { frameId: 0, frameTime: 0, playerList: [], pieceList: [] };
+}
+
+export const Frame = {
+  encode(message: Frame, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.frameId !== 0) {
+      writer.uint32(8).int64(message.frameId);
+    }
+    if (message.frameTime !== 0) {
+      writer.uint32(16).int64(message.frameTime);
+    }
+    for (const v of message.playerList) {
+      Frame_Player.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    writer.uint32(34).fork();
+    for (const v of message.pieceList) {
+      writer.int32(v);
+    }
+    writer.ldelim();
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Frame {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseFrame();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.frameId = longToNumber(reader.int64() as Long);
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.frameTime = longToNumber(reader.int64() as Long);
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.playerList.push(Frame_Player.decode(reader, reader.uint32()));
+          continue;
+        case 4:
+          if (tag === 32) {
+            message.pieceList.push(reader.int32());
+
+            continue;
+          }
+
+          if (tag === 34) {
+            const end2 = reader.uint32() + reader.pos;
+            while (reader.pos < end2) {
+              message.pieceList.push(reader.int32());
+            }
+
+            continue;
+          }
+
+          break;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseFrame_Player(): Frame_Player {
+  return { userId: 0, actionList: [] };
+}
+
+export const Frame_Player = {
+  encode(message: Frame_Player, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.userId !== 0) {
+      writer.uint32(8).int64(message.userId);
+    }
+    for (const v of message.actionList) {
+      Action.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): Frame_Player {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseFrame_Player();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.userId = longToNumber(reader.int64() as Long);
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.actionList.push(Action.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
 function createBaseLoginToGame(): LoginToGame {
   return { userId: 0 };
 }
@@ -1654,6 +1806,140 @@ export const StandUpResp = {
   },
 };
 
+function createBaseJoinTable(): JoinTable {
+  return { tableId: "" };
+}
+
+export const JoinTable = {
+  encode(message: JoinTable, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.tableId !== "") {
+      writer.uint32(10).string(message.tableId);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): JoinTable {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseJoinTable();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.tableId = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseJoinTableResp(): JoinTableResp {
+  return { code: 0 };
+}
+
+export const JoinTableResp = {
+  encode(message: JoinTableResp, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.code !== 0) {
+      writer.uint32(8).int32(message.code);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): JoinTableResp {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseJoinTableResp();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.code = reader.int32() as any;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseLeaveTable(): LeaveTable {
+  return {};
+}
+
+export const LeaveTable = {
+  encode(_: LeaveTable, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): LeaveTable {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseLeaveTable();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseLeaveTableResp(): LeaveTableResp {
+  return { code: 0 };
+}
+
+export const LeaveTableResp = {
+  encode(message: LeaveTableResp, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.code !== 0) {
+      writer.uint32(8).int32(message.code);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): LeaveTableResp {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseLeaveTableResp();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.code = reader.int32() as any;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
 function createBaseKickUser(): KickUser {
   return { userId: 0 };
 }
@@ -1906,42 +2192,6 @@ export const Ready = {
   },
 };
 
-function createBaseReadyResp(): ReadyResp {
-  return { code: 0 };
-}
-
-export const ReadyResp = {
-  encode(message: ReadyResp, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.code !== 0) {
-      writer.uint32(8).int32(message.code);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ReadyResp {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReadyResp();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.code = reader.int32() as any;
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
 function createBaseLoadRes(): LoadRes {
   return { current: 0 };
 }
@@ -2024,7 +2274,7 @@ export const ResumeTableResp = {
       writer.uint32(8).int32(message.code);
     }
     if (message.state !== undefined) {
-      GameStateResp.encode(message.state, writer.uint32(18).fork()).ldelim();
+      OnGameState.encode(message.state, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -2048,63 +2298,7 @@ export const ResumeTableResp = {
             break;
           }
 
-          message.state = GameStateResp.decode(reader, reader.uint32());
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseGameStateResp(): GameStateResp {
-  return { code: 0, state: 0, tableInfo: undefined };
-}
-
-export const GameStateResp = {
-  encode(message: GameStateResp, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.code !== 0) {
-      writer.uint32(8).int32(message.code);
-    }
-    if (message.state !== 0) {
-      writer.uint32(24).int32(message.state);
-    }
-    if (message.tableInfo !== undefined) {
-      TableInfo.encode(message.tableInfo, writer.uint32(42).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): GameStateResp {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGameStateResp();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.code = reader.int32() as any;
-          continue;
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.state = reader.int32() as any;
-          continue;
-        case 5:
-          if (tag !== 42) {
-            break;
-          }
-
-          message.tableInfo = TableInfo.decode(reader, reader.uint32());
+          message.state = OnGameState.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -2152,33 +2346,28 @@ export const UpdateFrame = {
   },
 };
 
-function createBaseOnFrame(): OnFrame {
-  return { frameId: 0, frameTime: 0, playerList: [], pieceList: [] };
+function createBaseOnGameState(): OnGameState {
+  return { code: 0, state: 0, tableInfo: undefined };
 }
 
-export const OnFrame = {
-  encode(message: OnFrame, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.frameId !== 0) {
-      writer.uint32(8).int64(message.frameId);
+export const OnGameState = {
+  encode(message: OnGameState, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.code !== 0) {
+      writer.uint32(8).int32(message.code);
     }
-    if (message.frameTime !== 0) {
-      writer.uint32(16).int64(message.frameTime);
+    if (message.state !== 0) {
+      writer.uint32(24).int32(message.state);
     }
-    for (const v of message.playerList) {
-      OnFrame_Player.encode(v!, writer.uint32(26).fork()).ldelim();
+    if (message.tableInfo !== undefined) {
+      TableInfo.encode(message.tableInfo, writer.uint32(42).fork()).ldelim();
     }
-    writer.uint32(34).fork();
-    for (const v of message.pieceList) {
-      writer.int32(v);
-    }
-    writer.ldelim();
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): OnFrame {
+  decode(input: _m0.Reader | Uint8Array, length?: number): OnGameState {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseOnFrame();
+    const message = createBaseOnGameState();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -2187,84 +2376,21 @@ export const OnFrame = {
             break;
           }
 
-          message.frameId = longToNumber(reader.int64() as Long);
-          continue;
-        case 2:
-          if (tag !== 16) {
-            break;
-          }
-
-          message.frameTime = longToNumber(reader.int64() as Long);
+          message.code = reader.int32() as any;
           continue;
         case 3:
-          if (tag !== 26) {
+          if (tag !== 24) {
             break;
           }
 
-          message.playerList.push(OnFrame_Player.decode(reader, reader.uint32()));
+          message.state = reader.int32() as any;
           continue;
-        case 4:
-          if (tag === 32) {
-            message.pieceList.push(reader.int32());
-
-            continue;
-          }
-
-          if (tag === 34) {
-            const end2 = reader.uint32() + reader.pos;
-            while (reader.pos < end2) {
-              message.pieceList.push(reader.int32());
-            }
-
-            continue;
-          }
-
-          break;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseOnFrame_Player(): OnFrame_Player {
-  return { userId: 0, actionList: [] };
-}
-
-export const OnFrame_Player = {
-  encode(message: OnFrame_Player, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.userId !== 0) {
-      writer.uint32(8).int64(message.userId);
-    }
-    for (const v of message.actionList) {
-      Action.encode(v!, writer.uint32(18).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): OnFrame_Player {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseOnFrame_Player();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
+        case 5:
+          if (tag !== 42) {
             break;
           }
 
-          message.userId = longToNumber(reader.int64() as Long);
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.actionList.push(Action.decode(reader, reader.uint32()));
+          message.tableInfo = TableInfo.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -2283,7 +2409,7 @@ function createBaseOnFrameList(): OnFrameList {
 export const OnFrameList = {
   encode(message: OnFrameList, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     for (const v of message.frameList) {
-      OnFrame.encode(v!, writer.uint32(10).fork()).ldelim();
+      Frame.encode(v!, writer.uint32(10).fork()).ldelim();
     }
     return writer;
   },
@@ -2300,7 +2426,7 @@ export const OnFrameList = {
             break;
           }
 
-          message.frameList.push(OnFrame.decode(reader, reader.uint32()));
+          message.frameList.push(Frame.decode(reader, reader.uint32()));
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -2358,6 +2484,32 @@ export const OnItemChange = {
 
           message.to = longToNumber(reader.int64() as Long);
           continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+};
+
+function createBaseOnNotify(): OnNotify {
+  return {};
+}
+
+export const OnNotify = {
+  encode(_: OnNotify, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): OnNotify {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOnNotify();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;

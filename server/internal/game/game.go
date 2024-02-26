@@ -49,7 +49,7 @@ func StartUp() {
 	}
 
 	opts := []nano.Option{
-		//nano.WithDebugMode(),
+		nano.WithDebugMode(),
 		// websocket
 		nano.WithWSPath("/nano"),
 		nano.WithIsWebsocket(true),

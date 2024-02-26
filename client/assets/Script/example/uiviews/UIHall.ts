@@ -65,7 +65,7 @@ export default class UIHall extends UIView {
                     let rspObject: CallbackObject = {
                         target: this,
                         callback: (cmd: number, data: any) => {
-                            let resp = JoinResp.decode(new Uint8Array(data.body));
+                            let resp = JoinResp.decode(data.body);
                             oo.log.logNet(resp, "快速开始，loading排队");
                             if (resp.code == ErrorCode.OK) {
 
@@ -101,7 +101,7 @@ export default class UIHall extends UIView {
         let rspObject: CallbackObject = {
             target: this,
             callback: (cmd: number, data: any) => {
-                let resp = GetRoomListResp.decode(new Uint8Array(data.body));
+                let resp = GetRoomListResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
                     this.refreshHallList(resp.roomList);
                 }

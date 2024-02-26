@@ -16,21 +16,6 @@ type NormalClient struct {
 	resProgress int32
 }
 
-func (c *NormalClient) SetSeatId(seatId int32) {
-	c.player.SeatId = seatId
-}
-
-func (c *NormalClient) GetSeatId() int32 {
-	return c.player.SeatId
-}
-
-func (c *NormalClient) ResetClient() {
-	c.frames = make(map[int64][]*proto.Action, 0)
-	c.player.End = false
-	c.lastFrameId = 0
-	c.resProgress = 0
-}
-
 func NewNormalClient(opt *util.ClientOption) *NormalClient {
 	var (
 		s      = opt.S
@@ -51,6 +36,37 @@ func NewNormalClient(opt *util.ClientOption) *NormalClient {
 	client.ResetClient()
 
 	return client
+}
+
+func (c *NormalClient) AfterInit() {
+	//go func() {
+	//
+	//	var ticker = time.NewTicker(time.Second)
+	//	defer ticker.Stop()
+	//
+	//	for {
+	//		select {
+	//
+	//		case <-ticker.C:
+	//
+	//		}
+	//	}
+	//}()
+}
+
+func (c *NormalClient) SetSeatId(seatId int32) {
+	c.player.SeatId = seatId
+}
+
+func (c *NormalClient) GetSeatId() int32 {
+	return c.player.SeatId
+}
+
+func (c *NormalClient) ResetClient() {
+	c.frames = make(map[int64][]*proto.Action, 0)
+	c.player.End = false
+	c.lastFrameId = 0
+	c.resProgress = 0
 }
 
 func (c *NormalClient) SetLastFrame(frameId int64) {
