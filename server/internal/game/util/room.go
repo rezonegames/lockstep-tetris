@@ -47,6 +47,8 @@ type TableEntity interface {
 	SitDown(s *session.Session, seatId int32, password string) error
 	KickUser(s *session.Session, kickUser int64) error
 	GetSeatUser(seatId int32) (ClientEntity, bool)
+	ReplyChangeSeat(s *session.Session, accept bool, wantSeatId int32, wantSeatUserId int64) error
+	ChangeSeat(s *session.Session, wantSeatId int32) error
 }
 
 type WaiterOption struct {
@@ -87,4 +89,6 @@ type ClientEntity interface {
 	SetLastFrame(frameId int64)
 	GetLastFrame() int64
 	AfterInit()
+	SetWantSeat(seatId int32)
+	GetJoinTime() int64
 }

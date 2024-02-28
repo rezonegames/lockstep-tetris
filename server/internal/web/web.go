@@ -5,6 +5,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	_ "net/http/pprof" //  初始化pprof
 	"os"
 	"os/signal"
 	"syscall"
@@ -47,6 +48,10 @@ func Logger() gin.HandlerFunc {
 
 func Register(r *gin.Engine) {
 	r.POST("/v1/login", api.QueryHandler)
+
+	r.GET("/debug/pprof/", func(c *gin.Context) {
+		http.Redirect(c.Writer, c.Request, "/debug/pprof/", http.StatusSeeOther)
+	})
 }
 
 func StartUp() {
@@ -66,12 +71,21 @@ func StartUp() {
 		Addr:    sc.ServerPort,
 		Handler: r,
 	}
+
 	go func() {
 		err := srv.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
 			return
 		}
 	}()
+
+	// pprof
+	go func() {
+		if err := http.ListenAndServe(":6060", nil); err != nil {
+			log.Info("pprof server error: %v\n", err)
+		}
+	}()
+
 	sg := make(chan os.Signal)
 	signal.Notify(sg, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL)
 	// stop server

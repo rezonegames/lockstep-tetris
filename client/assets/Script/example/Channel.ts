@@ -14,7 +14,7 @@ import {
     LoginToGame,
     LoginToGameResp,
     OnFrameList,
-    ResumeTable, ResumeTableResp, OnNotify
+    ResumeTable, ResumeTableResp,
 } from "db://assets/Script/example/proto/client";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {Message} from "db://assets/Script/example/nano/message";
@@ -83,11 +83,9 @@ const route2cmd = (route: string): number => {
         "onState": 100,
         "onFrame": 101,
         "onItemChange": 102,
-        "onNotify": 102,
     }
     return v[route];
 };
-
 
 class GameProtocol implements IProtocolHelper {
 
@@ -323,10 +321,6 @@ export class NetChannelManager {
             }
             oo.event.raiseEvent("onState", resp);
         }, this);
-        
-        this.gameAddListener("onNotify",(cmd, data: any)=>{
-            let resp = OnNotify.decode(data.body);
-        }, this)
 
         // 游戏内状态同步
         this.gameAddListener("onFrame", (cmd, data: any) => {

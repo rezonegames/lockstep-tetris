@@ -26,6 +26,8 @@ message TableInfo {
     int32 score = 3;
     Profile profile = 4;
     int32 seatId = 5;
+    // 请求换座位
+    int32 wantSeatId = 6;
   }
 
   // 桌子等待
@@ -48,11 +50,13 @@ message TableInfo {
   Res res = 6;
   Room room = 7;
   int64 randSeed = 8;
-  bool hasPassword = 10;
-  int32 roundId = 11;
-  int64 createTime = 12;
+  bool hasPassword = 9;
+  int32 roundId = 10;
+  int64 createTime = 11;
+  int64 owner = 12;
+
   // 结算本局时用的
-  map<int64, OnItemChange> playerItems = 9;
+  map<int64, OnItemChange> playerItems = 100;
 }
 
 message Room {
@@ -173,7 +177,7 @@ message KickUser {
 }
 
 message KickUserResp {
-  ErrorCode code =1;
+  ErrorCode code = 1;
 }
 
 message Join {
@@ -191,6 +195,12 @@ message Leave {
 
 message LeaveResp {
   ErrorCode code = 1;
+}
+
+message ReplyChangeSeat {
+  bool accept = 1;
+  int64 wantSeatUserId = 2;
+  int32 wantSeatId = 3;
 }
 
 message Ready {
@@ -232,9 +242,4 @@ message OnItemChange {
   repeated Item itemList = 1;
   string reason = 2;
   int64 to = 3;
-}
-
-// OnNotify 通知其它类型消息
-message OnNotify {
-
 }

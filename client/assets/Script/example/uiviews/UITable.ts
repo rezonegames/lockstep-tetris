@@ -28,7 +28,6 @@ export default class UITable extends UIView {
 
     tableInfo: TableInfo
     seatPlayer: { [key: number]: TableInfo_Player } = {};
-    oldSeatPlayer: { [key: number]: TableInfo_Player } = {};
 
     public onOpen(fromUI: number, ...args: any): void {
         super.onOpen(fromUI, ...args);
@@ -38,18 +37,14 @@ export default class UITable extends UIView {
 
         // 生成6个座位，
         let transform = this.table.getComponent(UITransform);
-        let [width, height, offset] = [transform.width, transform.height, 110];
+        let [width, height, offsetW, offsetH] = [transform.width, transform.height, 90, 80];
         let posList: Vec3[] = [
-            new Vec3(-width / 2 + offset, 0, 0), new Vec3(width / 2 - offset, 0, 0),
-            new Vec3(-offset, height / 2 - offset, 0), new Vec3(offset, height / 2 - offset, 0),
-            new Vec3(-offset, -height / 2 + offset, 0), new Vec3(offset, -height / 2 + offset, 0),
+            new Vec3(-width / 2 + offsetW, 0, 0), new Vec3(width / 2 - offsetW, 0, 0),
+            new Vec3(-offsetW, height / 2 - offsetH, 0), new Vec3(offsetW, height / 2 - offsetH, 0),
+            new Vec3(-offsetW, -height / 2 + offsetH, 0), new Vec3(offsetW, -height / 2 + offsetH, 0),
         ];
         for (let i = 0; i < 6; i++) {
             let [node, seatId] = [instantiate(this.playerPrefab), i];
-
-            node.on(Node.EventType.TOUCH_END, () => {
-                this.clickSeat(seatId);
-            })
 
             let label = node.getChildByName("Label").getComponent(Label);
             label.string = "";
@@ -60,13 +55,12 @@ export default class UITable extends UIView {
             sitBtn.on("click", () => {
                 this.sitDown(seatId);
             })
+
             kickBtn.on("click", () => {
                 this.kickUser(seatId);
             })
-
             node.setPosition(posList[seatId]);
             node.active = true;
-            layout.active = false;
             this.table.addChild(node);
             this.seatNodeMap[seatId] = node;
 
@@ -97,60 +91,53 @@ export default class UITable extends UIView {
 
     refreshTableInfo(tableInfo: TableInfo) {
         this.tableInfo = tableInfo;
-        let [players, readys] = [tableInfo.players, tableInfo.waiter?.readys];
-        this.oldSeatPlayer = this.seatPlayer;
+        let [players, readys, my, inTable, owner] = [tableInfo.players, tableInfo.waiter?.readys, oo.storage.getUser(), false, tableInfo.owner];
         this.seatPlayer = {};
-        for (let [uid, player] of Object.entries(players)) {
+        for (let [_, player] of Object.entries(players)) {
             let seatId = player.seatId;
             this.seatPlayer[seatId] = player;
+            if (my === player.profile?.userId) {
+                inTable = true;
+            }
         }
 
-        // 清理
-        for (let [seatId, node] of Object.entries(this.seatNodeMap)) {
-            this.clickSeat(parseInt(seatId));
-        }
-
-        for (let [uid, player] of Object.entries(players)) {
-            let [teamId, seatId, name, isReady] = [player.teamId, player.seatId, player.profile.name, readys[uid]];
-            let node = this.seatNodeMap[seatId];
+        // 重置界面
+        for (let seatId = 0; seatId < 6; seatId++) {
+            let [node, player, info] = [this.seatNodeMap[seatId], this.seatPlayer[seatId], "无"];
+            let layout = node.getChildByName("Layout");
             let label = node.getChildByName("Label").getComponent(Label);
-            label.string = `玩家：${uid}\n名字：${name}\n座位：${seatId}\n状态：${isReady ? "已准备" : "为准备"}`;
+            let  ownerNode = node.getChildByName("owner");
+            let [sitBtn, kickBtn] = [layout.getChildByName("Button-001"), layout.getChildByName("Button")];
+            sitBtn.active = true;
+            kickBtn.active = false;
+            ownerNode.active = false;
+
+            if (!!player) {
+                let [uid, name] = [player.profile?.userId, player.profile?.name];
+                let isReady = readys[uid]
+                info = `玩家：${uid}\n名字：${name}\n座位：${seatId}\n状态：${isReady ? "已准备" : "未准备"}`;
+                if (uid == owner) {
+                    ownerNode.active = true;
+                }
+                if (!inTable) {
+                    sitBtn.active = false;
+                } else {
+                    if (uid == my) {
+                        sitBtn.active = false;
+                    }
+                    if (my === owner && uid !== my) {
+                        kickBtn.active = true;
+                    }
+                }
+            }
+            label.string = info;
         }
+
     }
 
     onState(event: string, args: any) {
         let gameState = args as OnGameState;
         this.refreshTableInfo(gameState.tableInfo);
-    }
-
-    clickSeat(seatId: number) {
-        let [oldPlayer, player, node] = [this.oldSeatPlayer[seatId], this.seatPlayer[seatId], this.seatNodeMap[seatId]];
-        let layout = node.getChildByName("Layout");
-        let [label, kickBtn, sitBtn, my] = [node.getChildByName("Label"), layout.getChildByName("Button"), layout.getChildByName("Button-001"), this.seatPlayer[oo.storage.getUser()]];
-        if (!player) {
-            label.active = false;
-            layout.active = true;
-            sitBtn.active = true;
-            kickBtn.active = false;
-            return;
-        }
-
-        if (oldPlayer && (oldPlayer.profile?.userId == player.profile?.userId || player.profile?.userId == my.profile?.userId)) {
-            return;
-        }
-
-        let btnState = !layout.active;
-        layout.active = btnState;
-        label.active = !btnState;
-
-        if (btnState) {
-            if (my && my.seatId == 0) {
-                kickBtn.active = true;
-            } else {
-                kickBtn.active = false;
-            }
-            sitBtn.active = true;
-        }
     }
 
     kickUser(seatId: number) {

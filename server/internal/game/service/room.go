@@ -257,19 +257,36 @@ EXIT:
 	})
 }
 
-func (r *RoomService) SitDown(s *session.Session, msg *proto.SitDown) error {
+func (r *RoomService) ReplyChangeSeat(s *session.Session, msg *proto.ReplyChangeSeat) error {
 	var (
-		rs         *models.RoundSession
-		err        error
-		tableId    = msg.TableId
-		password   = msg.Password
-		seatId     = msg.SeatId
-		table      util.TableEntity
-		seatClient util.ClientEntity
-		ok         bool
+		accept         = msg.Accept
+		wantSeatId     = msg.WantSeatId
+		wantSeatUserId = msg.WantSeatUserId
+		table          util.TableEntity
+		err            error
 	)
 
-	rs, err = models.GetRoundSession(s.UID())
+	table, err = r.getTableFromSession(s)
+	if err != nil {
+		return err
+	}
+
+	return table.ReplyChangeSeat(s, accept, wantSeatId, wantSeatUserId)
+}
+
+func (r *RoomService) SitDown(s *session.Session, msg *proto.SitDown) error {
+	var (
+		rs       *models.RoundSession
+		err      error
+		tableId  = msg.TableId
+		password = msg.Password
+		seatId   = msg.SeatId
+		table    util.TableEntity
+		ok       bool
+		uid      = s.UID()
+	)
+
+	rs, err = models.GetRoundSession(uid)
 	if err != nil {
 		goto EXIT
 	}
@@ -279,9 +296,13 @@ func (r *RoomService) SitDown(s *session.Session, msg *proto.SitDown) error {
 		goto EXIT
 	}
 
-	seatClient, ok = table.GetSeatUser(seatId)
-	if ok {
-		seatClient.GetSession()
+	// 换座位，通知要换的人，等同意
+	if _, ok = table.GetSeatUser(seatId); ok {
+		err = table.ChangeSeat(s, seatId)
+		if err != nil {
+
+		}
+
 		goto EXIT
 	}
 

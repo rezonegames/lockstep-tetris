@@ -6,6 +6,7 @@ import (
 	"github.com/lonng/nano"
 	"github.com/lonng/nano/scheduler"
 	"github.com/lonng/nano/session"
+	"math"
 	"sync"
 	"tetris/config"
 	"tetris/internal/game/util"
@@ -40,6 +41,7 @@ type Table struct {
 	seatTeam      map[int32]int32
 	roundCounter  int32
 	createTime    int64
+	owner         int64 // 房主
 }
 
 func NewNormalTable(opt *util.TableOption) *Table {
@@ -463,6 +465,8 @@ func (t *Table) StandUp(s *session.Session) error {
 		delete(t.clients, uid)
 		// 为了通知
 		t.ChangeState(t.state)
+
+		t.SelectOwner()
 		return nil
 	}
 
@@ -510,6 +514,8 @@ func (t *Table) SitDown(s *session.Session, seatId int32, password string) error
 
 		client = NewClient(opt)
 		t.clients[uid] = client
+
+		t.SelectOwner()
 	} else {
 		// 换桌
 		client.SetSeatId(seatId)
@@ -559,6 +565,7 @@ func (t *Table) GetInfo() *proto.TableInfo {
 		HasPassword: t.password != "",
 		RoundId:     t.roundCounter,
 		CreateTime:  t.createTime,
+		Owner:       t.owner,
 	}
 }
 
@@ -591,4 +598,70 @@ func (t *Table) ResumeTable(s *session.Session, roundId int32, frameId int64) er
 func (t *Table) KickUser(s *session.Session, kickUser int64) error {
 	//TODO implement me
 	panic("implement me")
+}
+
+// ChangeSeat 换座位
+func (t *Table) ChangeSeat(s *session.Session, wantSeatId int32) error {
+	var (
+		client util.ClientEntity
+		uid    = s.UID()
+	)
+	client = t.Entity(uid)
+	client.SetWantSeat(wantSeatId)
+	return nil
+}
+
+func (t *Table) ReplyChangeSeat(s *session.Session, accept bool, wantSeatId int32, wantSeatUserId int64) error {
+	var (
+		err        error
+		wantClient util.ClientEntity
+		ok         bool
+		uid        = s.UID()
+		client     = t.clients[uid]
+	)
+
+	// 位置互换
+	if accept {
+		wantClient, ok = t.GetSeatUser(wantSeatId)
+		if !ok {
+			return errors.New("want player leave seat")
+		}
+
+		if wantClient.GetUserId() != wantSeatUserId {
+			return errors.New("want player not match")
+		}
+
+		err = t.SitDown(wantClient.GetSession(), client.GetSeatId(), t.password)
+		if err != nil {
+			return err
+		}
+
+		err = t.SitDown(s, wantSeatId, t.password)
+		if err != nil {
+			return err
+		}
+	}
+	wantClient.SetWantSeat(0)
+	return nil
+}
+
+// SelectOwner 选择帮主
+func (t *Table) SelectOwner() {
+	var (
+		minJoinTime = math.MaxInt64
+		ownerClient util.ClientEntity
+	)
+
+	for _, client := range t.clients {
+		var joinTime = int(client.GetJoinTime())
+		if joinTime < minJoinTime {
+			minJoinTime = joinTime
+			ownerClient = client
+		}
+	}
+	if ownerClient != nil {
+		t.owner = ownerClient.GetUserId()
+		log.Info(t.Format("[SelectOwner] owner is %d", t.owner))
+	}
+
 }

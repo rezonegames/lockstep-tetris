@@ -4,6 +4,7 @@ import (
 	"github.com/lonng/nano/session"
 	"sync"
 	"tetris/internal/game/util"
+	"tetris/pkg/z"
 	"tetris/proto/proto"
 )
 
@@ -14,6 +15,11 @@ type NormalClient struct {
 	lock        sync.RWMutex //锁，用于存帧
 	lastFrameId int64        // 当前客户端到了哪帧
 	resProgress int32
+	joinTime    int64
+}
+
+func (c *NormalClient) GetJoinTime() int64 {
+	return c.joinTime
 }
 
 func NewNormalClient(opt *util.ClientOption) *NormalClient {
@@ -22,6 +28,7 @@ func NewNormalClient(opt *util.ClientOption) *NormalClient {
 		teamId = opt.TeamId
 		seatId = opt.SeatId
 		p, _   = util.GetProfile(s)
+		now    = z.NowUnixMilli()
 	)
 
 	client := &NormalClient{
@@ -30,7 +37,8 @@ func NewNormalClient(opt *util.ClientOption) *NormalClient {
 			SeatId:  seatId,
 			Profile: util.ConvProfileToProtoProfile(p),
 		},
-		s: s,
+		s:        s,
+		joinTime: now,
 	}
 
 	client.ResetClient()
@@ -39,19 +47,7 @@ func NewNormalClient(opt *util.ClientOption) *NormalClient {
 }
 
 func (c *NormalClient) AfterInit() {
-	//go func() {
-	//
-	//	var ticker = time.NewTicker(time.Second)
-	//	defer ticker.Stop()
-	//
-	//	for {
-	//		select {
-	//
-	//		case <-ticker.C:
-	//
-	//		}
-	//	}
-	//}()
+
 }
 
 func (c *NormalClient) SetSeatId(seatId int32) {
@@ -136,4 +132,9 @@ func (c *NormalClient) GetTeamId() int32 {
 
 func (c *NormalClient) IsGameOver() bool {
 	return c.player.End
+}
+
+func (c *NormalClient) SetWantSeat(seatId int32) {
+	//TODO implement me
+	c.player.WantSeatId = seatId
 }

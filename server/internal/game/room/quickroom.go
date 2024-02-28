@@ -71,6 +71,10 @@ func (r *QuickRoom) WaitReady(sList []*session.Session) {
 
 	scheduler.NewAfterTimer(100*time.Millisecond, func() {
 		for i, v := range sList {
+			err = table.Join(v)
+			if err != nil {
+				panic(table.Format("[WaitReady] join error %+v", err))
+			}
 			err = table.SitDown(v, int32(i), "")
 			if err != nil {
 				panic(table.Format("[WaitReady] sit down error %+v", err))
