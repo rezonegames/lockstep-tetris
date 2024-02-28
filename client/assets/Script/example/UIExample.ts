@@ -28,14 +28,14 @@ export enum UIID {
 }
 
 export let UICF: { [key: number]: UIConf } = {
-    [UIID.UILogin]: {prefab: "Prefab/Login"},
-    [UIID.UIHall]: {prefab: "Prefab/Hall"},
-    [UIID.UIRoom]: {prefab: "Prefab/Room"},
-    [UIID.UITable]: {prefab: "Prefab/Table"},
-    [UIID.UIRegister]: {prefab: "Prefab/Register"},
-    [UIID.UIWaiting]: {prefab: "Prefab/Waiting"},
-    [UIID.UIControl]: {prefab: "Prefab/Control"},
-    [UIID.UISettlement]: {prefab: "Prefab/Settlement"},
+    [UIID.UILogin]: {prefab: "Prefab/Login", preventTouch: true},
+    [UIID.UIHall]: {prefab: "Prefab/Hall", preventTouch: true},
+    [UIID.UIRoom]: {prefab: "Prefab/Room", preventTouch: true},
+    [UIID.UITable]: {prefab: "Prefab/Table", preventTouch: true},
+    [UIID.UIRegister]: {prefab: "Prefab/Register", preventTouch: true},
+    [UIID.UIWaiting]: {prefab: "Prefab/Waiting", preventTouch: true},
+    [UIID.UIControl]: {prefab: "Prefab/Control", preventTouch: true},
+    [UIID.UISettlement]: {prefab: "Prefab/Settlement", preventTouch: true},
 }
 
 @ccclass

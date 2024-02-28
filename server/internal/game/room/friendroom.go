@@ -15,9 +15,6 @@ type FriendRoom struct {
 }
 
 func (f *FriendRoom) CreateTable(s *session.Session, tableId, password string) (util.TableEntity, error) {
-	if _, ok := f.tables[tableId]; ok {
-		return nil, errors.New("table already exist!!")
-	}
 	var (
 		opt = &util.TableOption{
 			Room:          f,
@@ -28,14 +25,23 @@ func (f *FriendRoom) CreateTable(s *session.Session, tableId, password string) (
 		err   error
 	)
 
+	if _, ok := f.tables[opt.CustomTableId]; ok {
+		return nil, errors.New("table already exist!!")
+	}
+
 	table = NewTable(opt)
+
+	err = table.Join(s)
+	if err != nil {
+		return nil, err
+	}
 
 	err = table.SitDown(s, 0, password)
 	if err != nil {
 		return nil, err
 	}
 
-	f.tables[tableId] = table
+	f.tables[opt.CustomTableId] = table
 
 	return table, nil
 }

@@ -262,6 +262,7 @@ class NetNodeGame extends NetNode {
         oo.log.logNet(event, "连接关闭");
         this.rejectReconnect();
         super.onClosed(event);
+        oo.event.raiseEvent("onUserInfo", {});
         uiManager.replace(UIID.UILogin);
     }
 

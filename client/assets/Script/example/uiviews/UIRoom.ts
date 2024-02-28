@@ -76,7 +76,7 @@ export default class UIRoom extends UIView {
                 let resp = CreateTableResp.decode(data.body);
                 if (resp.code == ErrorCode.OK) {
                     let tableInfo = resp.table
-                    this.joinTable(tableInfo)
+                    uiManager.open(UIID.UITable, tableInfo);
                 }
             }
         });

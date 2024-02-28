@@ -90,5 +90,6 @@ type ClientEntity interface {
 	GetLastFrame() int64
 	AfterInit()
 	SetWantSeat(seatId int32)
+	GetWantSeat() int32
 	GetJoinTime() int64
 }

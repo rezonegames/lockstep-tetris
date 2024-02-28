@@ -417,6 +417,27 @@ func (t *Table) GetSeatUser(seatId int32) (util.ClientEntity, bool) {
 	return nil, false
 }
 
+// SelectOwner 选择帮主
+func (t *Table) SelectOwner() {
+	var (
+		minJoinTime = math.MaxInt64
+		ownerClient util.ClientEntity
+	)
+
+	for _, client := range t.clients {
+		var joinTime = int(client.GetJoinTime())
+		if joinTime < minJoinTime {
+			minJoinTime = joinTime
+			ownerClient = client
+		}
+	}
+	if ownerClient != nil {
+		t.owner = ownerClient.GetUserId()
+		log.Info(t.Format("[SelectOwner] owner is %d", t.owner))
+	}
+
+}
+
 // StandUp 在游戏中退出，要保证重连能继续，不能把所有的资源都删掉
 func (t *Table) StandUp(s *session.Session) error {
 	var (
@@ -465,7 +486,6 @@ func (t *Table) StandUp(s *session.Session) error {
 		delete(t.clients, uid)
 		// 为了通知
 		t.ChangeState(t.state)
-
 		t.SelectOwner()
 		return nil
 	}
@@ -595,17 +615,42 @@ func (t *Table) ResumeTable(s *session.Session, roundId int32, frameId int64) er
 	return nil
 }
 
+// KickUser 帮主能踢人
 func (t *Table) KickUser(s *session.Session, kickUser int64) error {
-	//TODO implement me
-	panic("implement me")
+	var (
+		uid        = s.UID()
+		kickClient = t.Entity(kickUser)
+	)
+	if uid != t.owner {
+		return errors.New("player kick user permission deny")
+	}
+	return t.Leave(kickClient.GetSession())
 }
 
-// ChangeSeat 换座位
+// ChangeSeat 换座位，正在换座位不能换
 func (t *Table) ChangeSeat(s *session.Session, wantSeatId int32) error {
 	var (
-		client util.ClientEntity
-		uid    = s.UID()
+		client         util.ClientEntity
+		uid            = s.UID()
+		unableSeatList = make([]int32, 0)
 	)
+
+	for _, v := range t.clients {
+		var (
+			wsi = v.GetWantSeat()
+			si  = v.GetSeatId()
+		)
+		if wsi != -1 {
+			unableSeatList = append(unableSeatList, wsi, si)
+		}
+	}
+
+	for _, v := range unableSeatList {
+		if v == wantSeatId {
+			return errors.New("player can not seat")
+		}
+	}
+
 	client = t.Entity(uid)
 	client.SetWantSeat(wantSeatId)
 	return nil
@@ -641,27 +686,5 @@ func (t *Table) ReplyChangeSeat(s *session.Session, accept bool, wantSeatId int3
 			return err
 		}
 	}
-	wantClient.SetWantSeat(0)
 	return nil
-}
-
-// SelectOwner 选择帮主
-func (t *Table) SelectOwner() {
-	var (
-		minJoinTime = math.MaxInt64
-		ownerClient util.ClientEntity
-	)
-
-	for _, client := range t.clients {
-		var joinTime = int(client.GetJoinTime())
-		if joinTime < minJoinTime {
-			minJoinTime = joinTime
-			ownerClient = client
-		}
-	}
-	if ownerClient != nil {
-		t.owner = ownerClient.GetUserId()
-		log.Info(t.Format("[SelectOwner] owner is %d", t.owner))
-	}
-
 }

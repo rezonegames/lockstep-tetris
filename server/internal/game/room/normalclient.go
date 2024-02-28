@@ -18,10 +18,6 @@ type NormalClient struct {
 	joinTime    int64
 }
 
-func (c *NormalClient) GetJoinTime() int64 {
-	return c.joinTime
-}
-
 func NewNormalClient(opt *util.ClientOption) *NormalClient {
 	var (
 		s      = opt.S
@@ -33,9 +29,10 @@ func NewNormalClient(opt *util.ClientOption) *NormalClient {
 
 	client := &NormalClient{
 		player: &proto.TableInfo_Player{
-			TeamId:  teamId,
-			SeatId:  seatId,
-			Profile: util.ConvProfileToProtoProfile(p),
+			TeamId:     teamId,
+			SeatId:     seatId,
+			Profile:    util.ConvProfileToProtoProfile(p),
+			WantSeatId: -1,
 		},
 		s:        s,
 		joinTime: now,
@@ -137,4 +134,13 @@ func (c *NormalClient) IsGameOver() bool {
 func (c *NormalClient) SetWantSeat(seatId int32) {
 	//TODO implement me
 	c.player.WantSeatId = seatId
+	c.SetWantSeat(-1)
+}
+
+func (c *NormalClient) GetWantSeat() int32 {
+	return c.player.WantSeatId
+}
+
+func (c *NormalClient) GetJoinTime() int64 {
+	return c.joinTime
 }

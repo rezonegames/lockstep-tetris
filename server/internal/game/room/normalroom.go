@@ -25,8 +25,7 @@ func (f *Room) BackToWait(sList []*session.Session) {
 }
 
 func (r *Room) CreateTable(s *session.Session, tableId, password string) (util.TableEntity, error) {
-	//TODO implement me
-	panic("implement me")
+	panic("CreateTable not implement")
 }
 
 func (r *Room) GetInfo() *proto.Room {
