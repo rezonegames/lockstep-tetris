@@ -181,6 +181,7 @@ class NetNodeGame extends NetNode {
                         // 恢复成功，重进游戏
                         let state = resp.state;
                         if(!control) {
+                            game.openLoading();
                             uiManager.replace(UIID.UIControl, state.tableInfo);
                         } else {
                             control.notifyResProgress();
