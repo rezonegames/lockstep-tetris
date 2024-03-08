@@ -1,4 +1,4 @@
-import {_decorator, Label, Node, UITransform, Vec3, instantiate} from "cc";
+import {_decorator, Label, Node, UITransform, Vec3, Prefab, Sprite} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {
     OnGameState, KickUser, KickUserResp, LeaveTable, LeaveTableResp,
@@ -8,7 +8,8 @@ import {
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {channel} from "db://assets/Script/example/Channel";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
-import {oo} from "db://assets/Script/core/oo";
+import {Core} from "db://assets/Script/core/Core";
+import {GetTeamColor} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
 
@@ -18,8 +19,8 @@ export default class UITable extends UIView {
     @property(Label)
     private info: Label
 
-    @property(Node)
-    private playerPrefab: Node
+    @property(Prefab)
+    private playerPrefab: Prefab
 
     @property(Node)
     private table: Node
@@ -33,7 +34,7 @@ export default class UITable extends UIView {
         super.onOpen(fromUI, ...args);
         let tableInfo = args[0] as TableInfo;
         this.info.string = `桌子：${tableInfo.tableId}\nPVP：${tableInfo.room?.name}`;
-        oo.event.addEventListener("onState", this.onState, this);
+        Core.event.addEventListener("onState", this.onState, this);
 
         // 生成6个座位，
         let transform = this.table.getComponent(UITransform);
@@ -44,7 +45,7 @@ export default class UITable extends UIView {
             new Vec3(-offsetW, -height / 2 + offsetH, 0), new Vec3(offsetW, -height / 2 + offsetH, 0),
         ];
         for (let i = 0; i < 6; i++) {
-            let [node, seatId] = [instantiate(this.playerPrefab), i];
+            let [node, seatId] = [Core.resUtil.instantiate(this.playerPrefab), i];
 
             let label = node.getChildByName("Label").getComponent(Label);
             label.string = "";
@@ -63,14 +64,14 @@ export default class UITable extends UIView {
             node.active = true;
             this.table.addChild(node);
             this.seatNodeMap[seatId] = node;
-
+            node.getComponent(Sprite).color = GetTeamColor(i);
         }
         this.refreshTableInfo(tableInfo);
     }
 
     onClose(): any {
         super.onClose();
-        oo.event.removeEventListener("onState", this.onState, this);
+        Core.event.removeEventListener("onState", this.onState, this);
     }
 
     onBackToRoom() {
@@ -91,7 +92,7 @@ export default class UITable extends UIView {
 
     refreshTableInfo(tableInfo: TableInfo) {
         this.tableInfo = tableInfo;
-        let [players, readys, my, inTable, owner] = [tableInfo.players, tableInfo.waiter?.readys, oo.storage.getUser(), false, tableInfo.owner];
+        let [players, readys, my, inTable, owner] = [tableInfo.players, tableInfo.waiter?.readys, Core.storage.getUser(), false, tableInfo.owner];
         this.seatPlayer = {};
         for (let [_, player] of Object.entries(players)) {
             let seatId = player.seatId;

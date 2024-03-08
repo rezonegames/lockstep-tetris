@@ -1,5 +1,5 @@
 {
-  "ver": "2.3.4",
+  "ver": "2.3.8",
   "importer": "fbx",
   "imported": true,
   "uuid": "5929110e-03a3-451c-8a37-0241e6288eda",
@@ -12,9 +12,10 @@
       "id": "5c1d0",
       "name": "SM_Env_Road_Lines_02.mesh",
       "userData": {
-        "gltfIndex": 0
+        "gltfIndex": 0,
+        "triangleCount": 20
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -70,7 +71,7 @@
       "userData": {
         "gltfIndex": 0
       },
-      "ver": "1.0.12",
+      "ver": "1.0.14",
       "imported": true,
       "files": [
         ".json"
@@ -87,7 +88,8 @@
     ],
     "legacyFbxImporter": false,
     "fbx": {
-      "smartMaterialEnabled": true
+      "smartMaterialEnabled": true,
+      "matchMeshNames": false
     },
     "redirect": "5929110e-03a3-451c-8a37-0241e6288eda@1e338",
     "assetFinder": {
@@ -103,6 +105,24 @@
       ],
       "scenes": [
         "5929110e-03a3-451c-8a37-0241e6288eda@1e338"
+      ]
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
       ]
     }
   }

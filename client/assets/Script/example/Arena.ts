@@ -60,7 +60,7 @@ export class Arena {
             }
             const deleteRow = this.matrix.splice(y, 1)[0];
 
-            // oo.log.logView(deleteRow, "sweep");
+            // Core.log.logView(deleteRow, "sweep");
             deleteRow.forEach((v)=>{
                 let [color, item] = [Math.floor(v/1000), Math.floor(v%1000)];
                 if([ActionType.ITEM_ADD_ROW,

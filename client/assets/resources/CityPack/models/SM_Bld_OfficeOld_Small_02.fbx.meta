@@ -1,5 +1,5 @@
 {
-  "ver": "2.3.4",
+  "ver": "2.3.8",
   "importer": "fbx",
   "imported": true,
   "uuid": "847aedcf-71f6-4e43-89c1-a3bb73a46a73",
@@ -12,9 +12,10 @@
       "id": "a9fb8",
       "name": "SM_Bld_OfficeOld_Small_02.mesh",
       "userData": {
-        "gltfIndex": 0
+        "gltfIndex": 0,
+        "triangleCount": 3574
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -93,7 +94,7 @@
       "userData": {
         "gltfIndex": 0
       },
-      "ver": "1.0.12",
+      "ver": "1.0.14",
       "imported": true,
       "files": [
         ".json"
@@ -114,7 +115,8 @@
     ],
     "legacyFbxImporter": false,
     "fbx": {
-      "smartMaterialEnabled": true
+      "smartMaterialEnabled": true,
+      "matchMeshNames": false
     },
     "redirect": "847aedcf-71f6-4e43-89c1-a3bb73a46a73@3e46d",
     "assetFinder": {
@@ -131,6 +133,24 @@
       ],
       "scenes": [
         "847aedcf-71f6-4e43-89c1-a3bb73a46a73@3e46d"
+      ]
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
       ]
     }
   }

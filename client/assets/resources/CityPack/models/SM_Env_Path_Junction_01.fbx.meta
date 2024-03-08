@@ -1,5 +1,5 @@
 {
-  "ver": "2.3.4",
+  "ver": "2.3.8",
   "importer": "fbx",
   "imported": true,
   "uuid": "2c8bb09e-94c1-4157-840c-4f29e7b4cbd0",
@@ -12,9 +12,10 @@
       "id": "68f6b",
       "name": "SM_Env_Path_Junction_01.mesh",
       "userData": {
-        "gltfIndex": 0
+        "gltfIndex": 0,
+        "triangleCount": 316
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -93,7 +94,7 @@
       "userData": {
         "gltfIndex": 0
       },
-      "ver": "1.0.12",
+      "ver": "1.0.14",
       "imported": true,
       "files": [
         ".json"
@@ -114,7 +115,8 @@
     ],
     "legacyFbxImporter": false,
     "fbx": {
-      "smartMaterialEnabled": true
+      "smartMaterialEnabled": true,
+      "matchMeshNames": false
     },
     "redirect": "2c8bb09e-94c1-4157-840c-4f29e7b4cbd0@cb953",
     "assetFinder": {
@@ -131,6 +133,24 @@
       ],
       "scenes": [
         "2c8bb09e-94c1-4157-840c-4f29e7b4cbd0@cb953"
+      ]
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
       ]
     }
   }

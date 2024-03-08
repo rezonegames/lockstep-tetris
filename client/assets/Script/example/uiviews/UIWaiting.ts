@@ -1,7 +1,7 @@
 import {_decorator, Label, Node, Button} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
-import {oo} from "db://assets/Script/core/oo";
+import {Core} from "db://assets/Script/core/Core";
 import {
     Ready,
     Leave,
@@ -42,7 +42,7 @@ export default class UIWaiting extends UIView {
 
     public onOpen(fromUI: number, ...args: any): void {
         super.onOpen(fromUI, ...args);
-        oo.event.addEventListener("onState", this.onState, this);
+        Core.event.addEventListener("onState", this.onState, this);
         let room = args[0] as Room;
         let [name, roomId] = [room.name, room.roomId];
         this.title.string = `房间信息：名字：${name} 房间ID：${roomId}`;
@@ -51,7 +51,7 @@ export default class UIWaiting extends UIView {
 
     public onClose(): any {
         super.onClose();
-        oo.event.removeEventListener("onState", this.onState, this);
+        Core.event.removeEventListener("onState", this.onState, this);
     }
 
     clear() {
@@ -80,7 +80,7 @@ export default class UIWaiting extends UIView {
 
                         let countDown = tableInfo.waiter.countDown;
                         let readys = tableInfo.waiter.readys;
-                        let uid = oo.storage.getUser();
+                        let uid = Core.storage.getUser();
 
                         // 更新ui，打开游戏界面
                         this.countDown.string = `倒计时：${countDown}`;
@@ -140,7 +140,7 @@ export default class UIWaiting extends UIView {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = LeaveResp.decode(data.body);
-                oo.log.logNet(resp, "leave返回");
+                Core.log.logNet(resp, "leave返回");
                 if (resp.code == ErrorCode.OK) {
                     uiManager.close();
                 }

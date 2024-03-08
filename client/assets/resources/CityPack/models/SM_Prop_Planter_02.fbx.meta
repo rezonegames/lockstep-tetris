@@ -1,5 +1,5 @@
 {
-  "ver": "2.3.4",
+  "ver": "2.3.8",
   "importer": "fbx",
   "imported": true,
   "uuid": "fc9b7ee7-2601-4e30-a6fc-065c631ef852",
@@ -12,9 +12,10 @@
       "id": "4ff7e",
       "name": "SM_Prop_Planter_02.mesh",
       "userData": {
-        "gltfIndex": 0
+        "gltfIndex": 0,
+        "triangleCount": 479
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -93,7 +94,7 @@
       "userData": {
         "gltfIndex": 0
       },
-      "ver": "1.0.12",
+      "ver": "1.0.14",
       "imported": true,
       "files": [
         ".json"
@@ -114,7 +115,8 @@
     ],
     "legacyFbxImporter": false,
     "fbx": {
-      "smartMaterialEnabled": true
+      "smartMaterialEnabled": true,
+      "matchMeshNames": false
     },
     "redirect": "fc9b7ee7-2601-4e30-a6fc-065c631ef852@76e84",
     "assetFinder": {
@@ -131,6 +133,24 @@
       ],
       "scenes": [
         "fc9b7ee7-2601-4e30-a6fc-065c631ef852@76e84"
+      ]
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
       ]
     }
   }

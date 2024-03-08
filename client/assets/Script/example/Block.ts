@@ -1,4 +1,4 @@
-import {_decorator, Component, instantiate, Label, Node, Prefab, Sprite, SpriteFrame, Widget, UITransform, Color} from 'cc';
+import {_decorator, Component, Sprite, SpriteFrame} from 'cc';
 
 const {ccclass, property} = _decorator;
 

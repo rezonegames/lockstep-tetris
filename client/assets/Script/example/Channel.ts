@@ -8,7 +8,7 @@ import {
     NetData
 } from "db://assets/Script/core/network/NetInterface";
 import {NetNode} from "db://assets/Script/core/network/NetNode";
-import {oo} from "db://assets/Script/core/oo";
+import {Core} from "db://assets/Script/core/Core";
 import {
     OnGameState,
     LoginToGame,
@@ -25,6 +25,7 @@ import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {UIID} from "db://assets/Script/example/UIExample";
 import {EventMgr} from "db://assets/Script/core/common/EventManager";
 import UIControl from "db://assets/Script/example/uiviews/UIControl";
+import {game} from "db://assets/Script/example/Game";
 
 enum NetChannelType {
     /** 游戏服务器 */
@@ -33,48 +34,20 @@ enum NetChannelType {
 
 class NetTips implements INetworkTips {
 
-    private getLabel(): Label {
-        let label = null;
-        let winSize = view.getCanvasSize();
-        let scene = director.getScene();
-        if (scene) {
-            let node = scene.getChildByPath("Canvas/@net_tip_label");
-            if (node) {
-                label = node.getComponent(Label);
-            } else {
-                let node = new Node("@net_tip_label");
-                label = node.addComponent(Label);
-                node.setPosition(winSize.width / 2, winSize.height / 2);
-            }
-        }
-        return label!;
+    showTip(isShow: boolean) {
+
     }
 
     connectTips(isShow: boolean): void {
-        if (isShow) {
-            this.getLabel().string = "Connecting";
-            this.getLabel().node.active = true;
-        } else {
-            this.getLabel().node.active = false;
-        }
+        this.showTip(isShow);
     }
 
     reconnectTips(isShow: boolean): void {
-        if (isShow) {
-            this.getLabel().string = "Reconnecting";
-            this.getLabel().node.active = true;
-        } else {
-            this.getLabel().node.active = false;
-        }
+        this.showTip(isShow);
     }
 
     requestTips(isShow: boolean): void {
-        if (isShow) {
-            this.getLabel().string = "Requesting";
-            this.getLabel().node.active = true;
-        } else {
-            this.getLabel().node.active = false;
-        }
+        // this.showTip(isShow);
     }
 }
 
@@ -135,7 +108,7 @@ class NetNodeGame extends NetNode {
             }
             var buf = Package.encode(Package.TYPE_HANDSHAKE, Protocol.strencode(JSON.stringify(msg)));
             this.send(buf, true);
-            oo.log.logNet(msg, "handshake");
+            Core.log.logNet(msg, "handshake");
         }
         this._reconnetTimeOut = 8000;
 
@@ -152,10 +125,10 @@ class NetNodeGame extends NetNode {
     onHandAck() {
         // websocket 连接成功了
         this.onChecked();
-        oo.log.logNet(this.isReconnecting, "handshake结束");
+        Core.log.logNet(this.isReconnecting, "handshake结束");
         // 第一次连接
-        let uid = oo.storage.getUser();
-        oo.log.logView(uid, "账号");
+        let uid = Core.storage.getUser();
+        Core.log.logView(uid, "账号");
 
         // 如果没有账户，就打开注册窗口
         if (uid == 0) {
@@ -168,13 +141,13 @@ class NetNodeGame extends NetNode {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = LoginToGameResp.decode(data.body);
-                oo.log.logNet(resp, "登录游戏账号");
+                Core.log.logNet(resp, "登录游戏账号");
                 if (resp.code == ErrorCode.OK) {
                     // 重连，不去切换ui
                     if (this.isReconnecting) {
                         this.isReconnecting = false;
                     }
-                    oo.event.raiseEvent("onUserInfo", resp.profile);
+                    Core.event.raiseEvent("onUserInfo", resp.profile);
 
                     if (resp.tableId != "") {
                         // 如果tableId不为空，resumeTable，进入游戏
@@ -183,7 +156,7 @@ class NetNodeGame extends NetNode {
                     }
                     uiManager.replace(UIID.UIHall);
                 } else {
-                    oo.log.logNet(resp, "登录失败");
+                    Core.log.logNet(resp, "登录失败");
                 }
             }
         }
@@ -259,10 +232,10 @@ class NetNodeGame extends NetNode {
     }
 
     protected onClosed(event: any) {
-        oo.log.logNet(event, "连接关闭");
+        Core.log.logNet(event, "连接关闭");
         this.rejectReconnect();
         super.onClosed(event);
-        oo.event.raiseEvent("onUserInfo", {});
+        Core.event.raiseEvent("onUserInfo", {});
         uiManager.replace(UIID.UILogin);
     }
 
@@ -293,18 +266,20 @@ export class NetChannelManager {
         this.game = new NetNodeGame();
         // 游戏网络事件逻辑统一在 NetGameTips 里写
         this.game.init(new WebSock(), new GameProtocol(), new NetTips());
-        oo.tcp.setNetNode(this.game, NetChannelType.Game);
+        Core.tcp.setNetNode(this.game, NetChannelType.Game);
 
         // 根据游戏状态切换界面
         this.gameAddListener("onState", (cmd, data: any) => {
             let resp = OnGameState.decode(data.body);
-            oo.log.logNet(resp, "onState");
+            Core.log.logNet(resp, "onState");
             switch (resp.state) {
                 case GameState.INGAME:
                     let tableInfo = resp.tableInfo;
                     switch (tableInfo.tableState) {
                         case TableState.CHECK_RES:
                             if (!uiManager.isTopUI(UIID.UIControl)) {
+                                game.openLoading();
+
                                 uiManager.replace(UIID.UIControl, tableInfo);
                             }
                             break
@@ -320,7 +295,7 @@ export class NetChannelManager {
                 case GameState.WAIT:
                     break;
             }
-            oo.event.raiseEvent("onState", resp);
+            Core.event.raiseEvent("onState", resp);
         }, this);
 
         // 游戏内状态同步
@@ -332,7 +307,7 @@ export class NetChannelManager {
 
     // 连接游戏服务器
     public gameConnect(url: string) {
-        oo.tcp.connect({
+        Core.tcp.connect({
             url: `ws://${url}/nano`,
             autoReconnect: -1        // 自动连接
         }, NetChannelType.Game);
@@ -340,7 +315,7 @@ export class NetChannelManager {
 
     // 断开游戏服务器
     public gameClose() {
-        oo.tcp.close(undefined, undefined, NetChannelType.Game);
+        Core.tcp.close(undefined, undefined, NetChannelType.Game);
     }
 }
 

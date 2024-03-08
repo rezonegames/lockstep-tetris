@@ -1,7 +1,9 @@
-import {_decorator, Component, instantiate, Label, Node, Prefab, Sprite, SpriteFrame, Widget, UITransform, Color} from 'cc';
+import {_decorator, Component, Label, Node, Prefab, Sprite, SpriteFrame, Widget, UITransform, Color} from 'cc';
 import {Arena} from "db://assets/Script/example/Arena";
 import {Player} from "db://assets/Script/example/Player";
 import {Block} from "db://assets/Script/example/Block";
+import {Core} from "db://assets/Script/core/Core";
+import {GetTeamColor} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
 
@@ -46,10 +48,6 @@ export class Tetris extends Component {
     next: Node
     nextMatrix: Array<number>[]
 
-    // 背景颜色
-    @property([Color])
-    colorArray: Color[] = [];
-
     // tetris属性
     config: { w: number, h: number, bw: number, bh: number } = {
         w: 12,
@@ -75,13 +73,13 @@ export class Tetris extends Component {
 
     start() {
         // 背景颜色
-        this.getComponent(Sprite).color = this.colorArray[this.player.teamId];
+        this.getComponent(Sprite).color = GetTeamColor(this.player.teamId);
         const matrix = this.arena.matrix;
         const [w, h, bw, bh] = [this.config.w * this.config.bw, this.config.h * this.config.bh, this.config.bw, this.config.bh];
         matrix.forEach((row, y) => {
             this.itemArray[y] = []
             row.forEach((value, x) => {
-                let item: Node = instantiate(this.block);
+                let item: Node = Core.resUtil.instantiate(this.block);
                 this.canvas.addChild(item);
                 item.setPosition(-w / 2 + x * bw + bw / 2, h / 2 - (y + 1) * bh + bh / 2);
                 this.itemArray[y][x] = item;
@@ -99,7 +97,7 @@ export class Tetris extends Component {
         this.nextMatrix.forEach((row, y) => {
             this.nextArray[y] = []
             row.forEach((value, x) => {
-                let item: Node = instantiate(this.block);
+                let item: Node = Core.resUtil.instantiate(this.block);
                 item.getComponent(UITransform).setContentSize(bw1, bh1)
                 this.next.addChild(item);
                 item.setPosition(-w1 / 2 + x * bw1 + bw1 / 2, h1 / 2 - (y + 1) * bh1 + bh1 / 2);

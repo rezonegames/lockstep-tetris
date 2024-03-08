@@ -45,9 +45,10 @@ func NewNormalRoom(opt *util.RoomOption) *Room {
 	var (
 		conf   = opt.Config
 		roomId = conf.RoomId
+		room   *Room
 	)
 
-	room := &Room{
+	room = &Room{
 		roomId: roomId,
 		group:  nano.NewGroup(roomId),
 		config: conf,

@@ -1,18 +1,18 @@
-import {_decorator, Label, Node, Prefab, EditBox, instantiate} from "cc";
+import {_decorator, Label, Node, Prefab, EditBox} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {
     CreateTable, CreateTableResp,
     GetRoomInfo,
     GetRoomInfoResp, JoinTable, JoinTableResp, Leave, LeaveResp, Ready,
-    Room, SitDown, SitDownResp, TableInfo
+    Room, TableInfo
 } from "db://assets/Script/example/proto/client";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
-import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {channel} from "db://assets/Script/example/Channel";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {UIID} from "db://assets/Script/example/UIExample";
-import {oo} from "db://assets/Script/core/oo";
+import {Core} from "db://assets/Script/core/Core";
+import {game} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
 
@@ -25,8 +25,8 @@ export default class UIRoom extends UIView {
     @property(Label)
     private info: Label
 
-    @property(Node)
-    private tablePrefab: Node
+    @property(Prefab)
+    private tablePrefab: Prefab
 
     @property(EditBox)
     private myTableId: EditBox
@@ -77,6 +77,8 @@ export default class UIRoom extends UIView {
                 if (resp.code == ErrorCode.OK) {
                     let tableInfo = resp.table
                     uiManager.open(UIID.UITable, tableInfo);
+                } else {
+                    game.toast("创建失败！！");
                 }
             }
         });
@@ -103,7 +105,7 @@ export default class UIRoom extends UIView {
                 }
                 for (let i = 0; i < itemList.length; i++) {
                     let info = itemList[i];
-                    let [tableNode, ok] = children.length - 1 >= i ? [children[i], true] : [instantiate(this.tablePrefab), false];
+                    let [tableNode, ok] = children.length - 1 >= i ? [children[i], true] : [Core.resUtil.instantiate(this.tablePrefab), false];
                     tableNode.getChildByName("Label").getComponent(Label).string = `桌子ID：${info.tableId}`;
                     let [players, desc] = [info.players, ""];
                     for (const [uid, player] of Object.entries(players)) {

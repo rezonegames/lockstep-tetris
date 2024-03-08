@@ -3,8 +3,9 @@ import {AccountLoginReq, AccountLoginResp} from "db://assets/Script/example/prot
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {AccountType} from "db://assets/Script/example/proto/consts";
 import {UIView} from "db://assets/Script/core/ui/UIView";
-import {oo} from "db://assets/Script/core/oo";
+import {Core} from "db://assets/Script/core/Core";
 import {channel} from "db://assets/Script/example/Channel";
+import {game} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
 
@@ -46,10 +47,10 @@ export default class UILogin extends UIView {
             )
             .start()
 
-        oo.http.server = `http://192.168.8.27:8000`;
-        oo.http.server = `http://192.168.3.23:8000`;
-        oo.http.server = `http://192.168.3.69:8000`;
-        oo.http.server = `http://127.0.0.1:8000`;
+        Core.http.server = `http://192.168.8.27:8000`;
+        Core.http.server = `http://192.168.3.23:8000`;
+        // Core.http.server = `http://192.168.3.69:8000`;
+        // Core.http.server = `http://127.0.0.1:8000`;
 
         channel.gameCreate();
     }
@@ -70,24 +71,25 @@ export default class UILogin extends UIView {
 
     login(accountType: number, accountId: string) {
         this.clearConnect();
-        oo.http.postProtoBufParam("/v1/login", AccountLoginReq.encode({
+        Core.http.postProtoBufParam("/v1/login", AccountLoginReq.encode({
                 partition: accountType,
                 accountId: accountId
             }).finish(), (response: any) => {
                 let resp = AccountLoginResp.decode(response);
-                oo.log.logNet(resp, "登录");
+                Core.log.logNet(resp, "登录");
                 if (resp.code == ErrorCode.OK) {
                     this.setConnect(resp);
                     // 账号基本信息保存在本地
-                    oo.storage.setUser(resp.userId);
-                    oo.storage.set("accountId", accountId);
-                    oo.storage.set("adder", resp.addr);
+                    Core.storage.setUser(resp.userId);
+                    Core.storage.set("accountId", accountId);
+                    Core.storage.set("adder", resp.addr);
                 }
             }
         );
     }
 
     onGuestLogin() {
+        // game.openLoading();
         this.login(AccountType.DEVICEID, "test1");
     }
 

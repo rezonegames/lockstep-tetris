@@ -64,8 +64,8 @@ func NewNormalTable(opt *util.TableOption) *Table {
 		room:          room,
 		createTime:    now,
 		chState:       make(chan proto.TableState, 10),
-		chRoundOver:   make(chan bool, 0),
-		chEnd:         make(chan bool, 0),
+		chRoundOver:   make(chan bool, 6),
+		chEnd:         make(chan bool, 6),
 		password:      password,
 		seatTeam:      make(map[int32]int32, 0),
 	}
@@ -624,7 +624,7 @@ func (t *Table) KickUser(s *session.Session, kickUser int64) error {
 	if uid != t.owner {
 		return errors.New("player kick user permission deny")
 	}
-	return t.Leave(kickClient.GetSession())
+	return t.StandUp(kickClient.GetSession())
 }
 
 // ChangeSeat 换座位，正在换座位不能换

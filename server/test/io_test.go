@@ -128,7 +128,7 @@ func client(deviceId, rid string) {
 	defer ticker.Stop()
 	bSendCheckRes := false
 
-	//dida := 0
+	dida := 0
 	isReady := false
 
 	for {
@@ -173,17 +173,17 @@ func client(deviceId, rid string) {
 					break
 				case proto2.TableState_GAMING:
 
-					//dida++
-					//if dida == 3 {
-					//	c.Notify("r.update", &proto2.UpdateFrame{Action: &proto2.Action{
-					//		Key: proto2.ActionType_END,
-					//	}})
-					//}
+					dida++
+					if dida == 1000 {
+						c.Notify("r.update", &proto2.UpdateFrame{Action: &proto2.Action{
+							Key: proto2.ActionType_END,
+						}})
+					}
 
 					break
 				case proto2.TableState_SETTLEMENT:
 					state = proto2.GameState_IDLE
-					//dida = 0
+					dida = 0
 					fmt.Println(deviceId, "round over")
 				}
 			}

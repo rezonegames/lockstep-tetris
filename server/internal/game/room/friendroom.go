@@ -59,7 +59,7 @@ func (f *FriendRoom) AfterInit() {
 	scheduler.NewTimer(1*time.Second, func() {
 		// 最少10个桌子，方便加入
 		count := len(f.tables)
-		for i := 0; i < 10-count; i++ {
+		for i := 0; i < 2-count; i++ {
 			var (
 				tableId = fmt.Sprintf("%s:%d", f.roomId, i)
 				opt     = &util.TableOption{

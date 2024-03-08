@@ -2,7 +2,7 @@ import {UIID} from "../UIExample";
 import {_decorator, Label, Node} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {GetRoomList, GetRoomListResp, Join, JoinResp, Room} from "db://assets/Script/example/proto/client";
-import {oo} from "db://assets/Script/core/oo";
+import {Core} from "db://assets/Script/core/Core";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
@@ -66,7 +66,7 @@ export default class UIHall extends UIView {
                         target: this,
                         callback: (cmd: number, data: any) => {
                             let resp = JoinResp.decode(data.body);
-                            oo.log.logNet(resp, "快速开始，loading排队");
+                            Core.log.logNet(resp, "快速开始，loading排队");
                             if (resp.code == ErrorCode.OK) {
 
                                 switch (item.type) {

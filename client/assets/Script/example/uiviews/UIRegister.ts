@@ -3,7 +3,7 @@ import {Sprite, _decorator, Label, EditBox} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {LoginToGameResp, RegisterGameReq} from "db://assets/Script/example/proto/client";
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
-import {oo} from "db://assets/Script/core/oo";
+import {Core} from "db://assets/Script/core/Core";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {channel} from "db://assets/Script/example/Channel";
@@ -21,8 +21,8 @@ export default class UIRegister extends UIView {
 
     public onOpen(fromUI: number, ...args: any): void {
         super.onOpen(fromUI, ...args);
-        let accountId = oo.storage.get("accountId");
-        oo.log.logView(accountId, "accountId");
+        let accountId = Core.storage.get("accountId");
+        Core.log.logView(accountId, "accountId");
         this.myAccount.string = accountId;
     }
 
@@ -34,7 +34,7 @@ export default class UIRegister extends UIView {
             target: null,
             callback: (cmd: number, data: any) => {
                 let resp = LoginToGameResp.decode(new Uint8Array(data));
-                oo.log.logNet(resp, "注册游戏账号");
+                Core.log.logNet(resp, "注册游戏账号");
                 if (resp.code == ErrorCode.OK) {
                     uiManager.replace(UIID.UIHall);
                 }

@@ -1,6 +1,6 @@
 import {Component, _decorator} from "cc";
 import {UIConf, uiManager} from "db://assets/Script/core/ui/UIManager";
-import {oo} from "db://assets/Script/core/oo";
+import {Core} from "db://assets/Script/core/Core";
 import {channel} from "db://assets/Script/example/Channel";
 
 // Learn TypeScript:
@@ -43,7 +43,6 @@ export default class UIExample extends Component {
 
     start() {
         uiManager.initUIConf(UICF);
-        // background 层，在切换ui的时候不隐藏
         uiManager.open(UIID.UILogin);
     }
 }

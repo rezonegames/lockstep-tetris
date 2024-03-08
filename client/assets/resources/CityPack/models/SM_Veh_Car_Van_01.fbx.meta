@@ -1,5 +1,5 @@
 {
-  "ver": "2.3.4",
+  "ver": "2.3.8",
   "importer": "fbx",
   "imported": true,
   "uuid": "ab887fe7-6042-4915-a782-66727ee4e6aa",
@@ -14,7 +14,7 @@
       "userData": {
         "gltfIndex": 0
       },
-      "ver": "1.0.12",
+      "ver": "1.0.14",
       "imported": true,
       "files": [
         ".json"
@@ -28,9 +28,10 @@
       "id": "94040",
       "name": "SM_Veh_Car_Van_Door_r_Glass.mesh",
       "userData": {
-        "gltfIndex": 9
+        "gltfIndex": 9,
+        "triangleCount": 8
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -45,9 +46,10 @@
       "id": "bd7d5",
       "name": "SM_Veh_Car_Van_01.mesh",
       "userData": {
-        "gltfIndex": 0
+        "gltfIndex": 0,
+        "triangleCount": 2949
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -62,9 +64,10 @@
       "id": "186c4",
       "name": "SM_Veh_Car_Van_Glass.mesh",
       "userData": {
-        "gltfIndex": 1
+        "gltfIndex": 1,
+        "triangleCount": 30
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -79,9 +82,10 @@
       "id": "9ed85",
       "name": "SM_Veh_Car_Van_Wheel_fl.mesh",
       "userData": {
-        "gltfIndex": 2
+        "gltfIndex": 2,
+        "triangleCount": 456
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -96,9 +100,10 @@
       "id": "d97cc",
       "name": "SM_Veh_Car_Van_Wheel_rl.mesh",
       "userData": {
-        "gltfIndex": 3
+        "gltfIndex": 3,
+        "triangleCount": 456
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -113,9 +118,10 @@
       "id": "c2946",
       "name": "SM_Veh_Car_Van_Wheel_rr.mesh",
       "userData": {
-        "gltfIndex": 4
+        "gltfIndex": 4,
+        "triangleCount": 456
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -130,9 +136,10 @@
       "id": "e1804",
       "name": "SM_Veh_Car_Van_Wheel_fr.mesh",
       "userData": {
-        "gltfIndex": 5
+        "gltfIndex": 5,
+        "triangleCount": 456
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -147,9 +154,10 @@
       "id": "e0d5b",
       "name": "SM_Veh_Car_Van_Door_l.mesh",
       "userData": {
-        "gltfIndex": 6
+        "gltfIndex": 6,
+        "triangleCount": 154
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -164,9 +172,10 @@
       "id": "6db21",
       "name": "SM_Veh_Car_Van_Door_l_Glass.mesh",
       "userData": {
-        "gltfIndex": 7
+        "gltfIndex": 7,
+        "triangleCount": 8
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -181,9 +190,10 @@
       "id": "0e914",
       "name": "SM_Veh_Car_Van_Door_r.mesh",
       "userData": {
-        "gltfIndex": 8
+        "gltfIndex": 8,
+        "triangleCount": 154
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -198,9 +208,10 @@
       "id": "ecd83",
       "name": "SM_Veh_Car_Van_SteeringW.mesh",
       "userData": {
-        "gltfIndex": 10
+        "gltfIndex": 10,
+        "triangleCount": 374
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -215,9 +226,10 @@
       "id": "f7036",
       "name": "SM_Veh_Car_Van_Plates.mesh",
       "userData": {
-        "gltfIndex": 11
+        "gltfIndex": 11,
+        "triangleCount": 164
       },
-      "ver": "1.1.0",
+      "ver": "1.1.1",
       "imported": true,
       "files": [
         ".bin",
@@ -317,7 +329,8 @@
     ],
     "legacyFbxImporter": false,
     "fbx": {
-      "smartMaterialEnabled": true
+      "smartMaterialEnabled": true,
+      "matchMeshNames": false
     },
     "redirect": "ab887fe7-6042-4915-a782-66727ee4e6aa@83387",
     "assetFinder": {
@@ -346,6 +359,24 @@
       ],
       "scenes": [
         "ab887fe7-6042-4915-a782-66727ee4e6aa@83387"
+      ]
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
       ]
     }
   }
