@@ -19,29 +19,30 @@ import (
 
 // 桌子
 type Table struct {
-	group         *nano.Group
-	tableId       string
-	conf          *config.Room
-	clients       map[int64]util.ClientEntity
-	loseTeams     map[int32]int64
-	teamGroupSize int32
-	lock          sync.RWMutex
-	waiter        util.WaiterEntity
-	room          util.RoomEntity
-	state         proto.TableState
-	chState       chan proto.TableState
-	chRoundOver   chan bool
-	chEnd         chan bool
-	nextFrameId   int64
-	frameTimes    map[int64]int64
-	randSeed      int64
-	pieceList     []int32
-	resCountDown  int32 // 检查资源是否加载成功
-	password      string
-	seatTeam      map[int32]int32
-	roundCounter  int32
-	createTime    int64
-	owner         int64 // 房主
+	group          *nano.Group
+	tableId        string
+	conf           *config.Room
+	clients        map[int64]util.ClientEntity
+	loseTeams      map[int32]int64
+	teamGroupSize  int32
+	lock           sync.RWMutex
+	waiter         util.WaiterEntity
+	room           util.RoomEntity
+	state          proto.TableState
+	chState        chan proto.TableState
+	chRoundOver    chan bool
+	chEnd          chan bool
+	nextFrameId    int64
+	frameTimes     map[int64]int64
+	randSeed       int64
+	pieceList      []int32
+	resCountDown   int32 // 检查资源是否加载成功
+	password       string
+	seatTeam       map[int32]int32
+	roundCounter   int32
+	createTime     int64
+	owner          int64 // 房主
+	roundBeginTime time.Time
 }
 
 func NewNormalTable(opt *util.TableOption) *Table {
@@ -142,6 +143,10 @@ func (t *Table) Run() {
 
 func (t *Table) checkState() {
 	// 每秒执行一次的任务，
+	var (
+		now = z.GetTime()
+	)
+
 	switch t.state {
 	case proto.TableState_CHECK_RES:
 		b := true
@@ -154,7 +159,13 @@ func (t *Table) checkState() {
 			t.ChangeState(proto.TableState_GAMING)
 		}
 		t.resCountDown--
+		t.roundBeginTime = now
 		break
+	case proto.TableState_GAMING:
+		// 游戏超过20分钟，直接把桌子干掉
+		if t.group.Count() == 0 && now.Sub(t.roundBeginTime) >= 5*time.Minute {
+			t.ChangeState(proto.TableState_ABORT)
+		}
 	}
 }
 
@@ -469,11 +480,12 @@ func (t *Table) StandUp(s *session.Session) error {
 		fallthrough
 	case proto.TableState_GAMING:
 		// 如果游戏过程中，只剩下一个人，要中断游戏，并清理桌子
-		if t.group.Count() == 1 {
-			t.ChangeState(proto.TableState_ABORT)
-		} else {
-			log.Info(t.Format("[StandUp] %d wait back", uid))
-		}
+		//if t.group.Count() == 1 {
+		//	t.ChangeState(proto.TableState_ABORT)
+		//} else {
+		//	log.Info(t.Format("[StandUp] %d wait back", uid))
+		//}
+		log.Info(t.Format("[StandUp] %d wait back", uid))
 		break
 
 	case proto.TableState_ABORT:

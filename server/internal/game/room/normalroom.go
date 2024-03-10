@@ -107,6 +107,12 @@ func (r *Room) Leave(s *session.Session) error {
 		table util.TableEntity
 		uid   = s.UID()
 	)
+	defer func(group *nano.Group, s *session.Session) {
+		err = group.Leave(s)
+		if err != nil {
+		}
+	}(r.group, s)
+
 	rs, err = models.GetRoundSession(uid)
 	if err == nil {
 		// 说明在桌子里
@@ -127,7 +133,7 @@ func (r *Room) Leave(s *session.Session) error {
 EXIT:
 	log.Info(r.Format("[Leave] user %d", uid))
 	models.RemoveRoundSession(uid)
-	return r.group.Leave(s)
+	return nil
 }
 
 func (r *Room) OnTableDeleted(tableId string) {
