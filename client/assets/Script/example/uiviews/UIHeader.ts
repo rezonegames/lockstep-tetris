@@ -33,7 +33,7 @@ export default class UIHeader extends Component {
     onUserInfo(event: string, args: any) {
         let profile = args as Profile;
 
-        if(!!profile.userId) {
+        if(!profile.userId) {
             this.myName.string = "";
             this.myCoin.string = "";
             return;

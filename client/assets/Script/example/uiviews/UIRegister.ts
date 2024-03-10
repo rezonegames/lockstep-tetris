@@ -31,11 +31,12 @@ export default class UIRegister extends UIView {
             name: this.myName.string,
             accountId: this.myAccount.string
         }).finish(), {
-            target: null,
+            target: this,
             callback: (cmd: number, data: any) => {
-                let resp = LoginToGameResp.decode(new Uint8Array(data));
+                let resp = LoginToGameResp.decode(data.body);
                 Core.log.logNet(resp, "注册游戏账号");
                 if (resp.code == ErrorCode.OK) {
+                    Core.event.raiseEvent("onUserInfo", resp.profile);
                     uiManager.replace(UIID.UIHall);
                 }
             }

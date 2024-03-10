@@ -1,4 +1,4 @@
-import {_decorator, Label, Node, tween, Vec3, Sprite} from "cc";
+import {_decorator, Label, Node, tween, Vec3, Sprite, EditBox} from "cc";
 import {AccountLoginReq, AccountLoginResp} from "db://assets/Script/example/proto/web";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {AccountType} from "db://assets/Script/example/proto/consts";
@@ -6,6 +6,8 @@ import {UIView} from "db://assets/Script/core/ui/UIView";
 import {Core} from "db://assets/Script/core/Core";
 import {channel} from "db://assets/Script/example/Channel";
 import {game} from "db://assets/Script/example/Game";
+import {uiManager} from "db://assets/Script/core/ui/UIManager";
+import {UIID} from "db://assets/Script/example/UIExample";
 
 const {ccclass, property} = _decorator;
 
@@ -20,7 +22,6 @@ export default class UILogin extends UIView {
 
     @property(Sprite)
     private testSprite: Sprite
-
 
     private resp: AccountLoginResp
 
@@ -89,16 +90,17 @@ export default class UILogin extends UIView {
     }
 
     onGuestLogin() {
-        // game.openLoading();
-        this.login(AccountType.DEVICEID, "test1");
+        uiManager.open(UIID.UILogin_Guest, this);
     }
 
     onWeiXinLogin() {
-        this.login(AccountType.WX, "wxId");
+        game.toast("敬请期待");
+        // this.login(AccountType.WX, "wxId");
     }
 
     onFacebookLogin() {
-        this.login(AccountType.FB, "fbId");
+        game.toast("敬请期待");
+        // this.login(AccountType.FB, "fbId");
     }
 
     onConnect() {

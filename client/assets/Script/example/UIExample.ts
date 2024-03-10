@@ -13,10 +13,11 @@ import {channel} from "db://assets/Script/example/Channel";
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
 //  - [English] http://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
 
-const {ccclass, property} = _decorator;
+const {ccclass} = _decorator;
 
 export enum UIID {
     UILogin,
+    UILogin_Guest,
     UIRegister,
     UIHall,
     UIRoom,
@@ -28,14 +29,15 @@ export enum UIID {
 }
 
 export let UICF: { [key: number]: UIConf } = {
-    [UIID.UILogin]: {prefab: "Prefab/Login", preventTouch: true},
-    [UIID.UIHall]: {prefab: "Prefab/Hall", preventTouch: true},
-    [UIID.UIRoom]: {prefab: "Prefab/Room", preventTouch: true},
-    [UIID.UITable]: {prefab: "Prefab/Table", preventTouch: true},
-    [UIID.UIRegister]: {prefab: "Prefab/Register", preventTouch: true},
-    [UIID.UIWaiting]: {prefab: "Prefab/Waiting", preventTouch: true},
+    [UIID.UILogin]: {prefab: "Prefab/Login"},
+    [UIID.UILogin_Guest]: {prefab: "Prefab/Login_Guest", preventTouch: true},
+    [UIID.UIHall]: {prefab: "Prefab/Hall"},
+    [UIID.UIRoom]: {prefab: "Prefab/Room"},
+    [UIID.UITable]: {prefab: "Prefab/Table"},
+    [UIID.UIRegister]: {prefab: "Prefab/Register"},
+    [UIID.UIWaiting]: {prefab: "Prefab/Waiting"},
     [UIID.UIControl]: {prefab: "Prefab/Control", preventTouch: true},
-    [UIID.UISettlement]: {prefab: "Prefab/Settlement", preventTouch: true},
+    [UIID.UISettlement]: {prefab: "Prefab/Settlement"},
 }
 
 @ccclass
