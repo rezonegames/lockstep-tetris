@@ -6,9 +6,9 @@ import {
     Room, SitDown, SitDownResp, StandUp, StandUpResp, TableInfo, TableInfo_Player
 } from "db://assets/Script/example/proto/client";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
-import {channel} from "db://assets/Script/example/Channel";
+
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
-import {Core} from "db://assets/Script/core/Core";
+import {Game} from "db://assets/Script/example/Game";
 import {GetTeamColor} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
@@ -34,7 +34,7 @@ export default class UITable extends UIView {
         super.onOpen(fromUI, ...args);
         let tableInfo = args[0] as TableInfo;
         this.info.string = `桌子：${tableInfo.tableId}\nPVP：${tableInfo.room?.name}`;
-        Core.event.addEventListener("onState", this.onState, this);
+        Game.event.addEventListener("onState", this.onState, this);
 
         // 生成6个座位，
         let transform = this.table.getComponent(UITransform);
@@ -45,7 +45,7 @@ export default class UITable extends UIView {
             new Vec3(-offsetW, -height / 2 + offsetH, 0), new Vec3(offsetW, -height / 2 + offsetH, 0),
         ];
         for (let i = 0; i < 6; i++) {
-            let [node, seatId] = [Core.resUtil.instantiate(this.playerPrefab), i];
+            let [node, seatId] = [Game.resUtil.instantiate(this.playerPrefab), i];
 
             let label = node.getChildByName("Label").getComponent(Label);
             label.string = "";
@@ -71,11 +71,11 @@ export default class UITable extends UIView {
 
     onClose(): any {
         super.onClose();
-        Core.event.removeEventListener("onState", this.onState, this);
+        Game.event.removeEventListener("onState", this.onState, this);
     }
 
     onBackToRoom() {
-        channel.gameReqest("r.leavetable", LeaveTable.encode({}).finish(), {
+        Game.channel.gameReqest("r.leavetable", LeaveTable.encode({}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = LeaveTableResp.decode(data.body);
@@ -87,12 +87,12 @@ export default class UITable extends UIView {
     }
 
     onReady() {
-        channel.gameNotify("r.ready", Ready.encode({}).finish());
+        Game.channel.gameNotify("r.ready", Ready.encode({}).finish());
     }
 
     refreshTableInfo(tableInfo: TableInfo) {
         this.tableInfo = tableInfo;
-        let [players, readys, my, inTable, owner] = [tableInfo.players, tableInfo.waiter?.readys, Core.storage.getUser(), false, tableInfo.owner];
+        let [players, readys, my, inTable, owner] = [tableInfo.players, tableInfo.waiter?.readys, Game.storage.getUser(), false, tableInfo.owner];
         this.seatPlayer = {};
         for (let [_, player] of Object.entries(players)) {
             let seatId = player.seatId;
@@ -146,7 +146,7 @@ export default class UITable extends UIView {
         if (!player) {
             return;
         }
-        channel.gameReqest("r.kickuser", KickUser.encode({
+        Game.channel.gameReqest("r.kickuser", KickUser.encode({
             userId: player.profile?.userId,
         }).finish(), {
             target: this,
@@ -161,7 +161,7 @@ export default class UITable extends UIView {
 
     sitDown(seatId: number) {
         let tableId = this.tableInfo.tableId;
-        channel.gameReqest("r.sitdown", SitDown.encode({
+        Game.channel.gameReqest("r.sitdown", SitDown.encode({
             tableId: tableId,
             password: "",
             seatId: seatId

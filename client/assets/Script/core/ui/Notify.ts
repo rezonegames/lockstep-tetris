@@ -1,5 +1,5 @@
 import { Animation, Component, Label, _decorator } from "cc";
-import {Core} from "db://assets/Script/core/Core";
+import {Game} from "db://assets/Script/example/Game";
 
 const { ccclass, property } = _decorator;
 

@@ -1,7 +1,7 @@
 import {Component, _decorator} from "cc";
 import {UIConf, uiManager} from "db://assets/Script/core/ui/UIManager";
-import {Core} from "db://assets/Script/core/Core";
-import {channel} from "db://assets/Script/example/Channel";
+import {Game} from "db://assets/Script/example/Game";
+
 
 // Learn TypeScript:
 //  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/typescript.html
@@ -44,6 +44,7 @@ export let UICF: { [key: number]: UIConf } = {
 export default class UIExample extends Component {
 
     start() {
+        Game.initGame();
         uiManager.initUIConf(UICF);
         uiManager.open(UIID.UILogin);
     }

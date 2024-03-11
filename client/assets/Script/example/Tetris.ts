@@ -2,7 +2,7 @@ import {_decorator, Component, Label, Node, Prefab, Sprite, SpriteFrame, Widget,
 import {Arena} from "db://assets/Script/example/Arena";
 import {Player} from "db://assets/Script/example/Player";
 import {Block} from "db://assets/Script/example/Block";
-import {Core} from "db://assets/Script/core/Core";
+import {Game} from "db://assets/Script/example/Game";
 import {GetTeamColor} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
@@ -79,7 +79,7 @@ export class Tetris extends Component {
         matrix.forEach((row, y) => {
             this.itemArray[y] = []
             row.forEach((value, x) => {
-                let item: Node = Core.resUtil.instantiate(this.block);
+                let item: Node = Game.resUtil.instantiate(this.block);
                 this.canvas.addChild(item);
                 item.setPosition(-w / 2 + x * bw + bw / 2, h / 2 - (y + 1) * bh + bh / 2);
                 this.itemArray[y][x] = item;
@@ -97,7 +97,7 @@ export class Tetris extends Component {
         this.nextMatrix.forEach((row, y) => {
             this.nextArray[y] = []
             row.forEach((value, x) => {
-                let item: Node = Core.resUtil.instantiate(this.block);
+                let item: Node = Game.resUtil.instantiate(this.block);
                 item.getComponent(UITransform).setContentSize(bw1, bh1)
                 this.next.addChild(item);
                 item.setPosition(-w1 / 2 + x * bw1 + bw1 / 2, h1 / 2 - (y + 1) * bh1 + bh1 / 2);

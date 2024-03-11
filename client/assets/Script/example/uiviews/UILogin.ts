@@ -3,9 +3,8 @@ import {AccountLoginReq, AccountLoginResp} from "db://assets/Script/example/prot
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {AccountType} from "db://assets/Script/example/proto/consts";
 import {UIView} from "db://assets/Script/core/ui/UIView";
-import {Core} from "db://assets/Script/core/Core";
-import {channel} from "db://assets/Script/example/Channel";
-import {game} from "db://assets/Script/example/Game";
+
+import {Game} from "db://assets/Script/example/Game";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {UIID} from "db://assets/Script/example/UIExample";
 
@@ -27,10 +26,7 @@ export default class UILogin extends UIView {
 
     onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
-
         this.clearConnect();
-        channel.gameClose();
-
         tween(this.testSprite.node)
             .to(1, {
                     scale: new Vec3(2, 2, 2),
@@ -45,11 +41,11 @@ export default class UILogin extends UIView {
                 {easing: 'sineOutIn'}
             )
             .start()
-        channel.gameCreate();
     }
 
     clearConnect() {
         this.connect.active = false;
+        Game.channel.gameClose();
     }
 
     setConnect(resp: AccountLoginResp) {
@@ -64,18 +60,18 @@ export default class UILogin extends UIView {
 
     login(accountType: number, accountId: string) {
         this.clearConnect();
-        Core.http.postProtoBufParam("/v1/login", AccountLoginReq.encode({
+        Game.http.postProtoBufParam("/v1/login", AccountLoginReq.encode({
                 partition: accountType,
                 accountId: accountId
             }).finish(), (response: any) => {
                 let resp = AccountLoginResp.decode(response);
-                Core.log.logNet(resp, "登录");
+                Game.log.logNet(resp, "登录");
                 if (resp.code == ErrorCode.OK) {
                     this.setConnect(resp);
                     // 账号基本信息保存在本地
-                    Core.storage.setUser(resp.userId);
-                    Core.storage.set("accountId", accountId);
-                    Core.storage.set("adder", resp.addr);
+                    Game.storage.setUser(resp.userId);
+                    Game.storage.set("accountId", accountId);
+                    Game.storage.set("adder", resp.addr);
                 }
             }
         );
@@ -86,17 +82,17 @@ export default class UILogin extends UIView {
     }
 
     onWeiXinLogin() {
-        game.toast("敬请期待");
+        Game.toast("敬请期待");
         // this.login(AccountType.WX, "wxId");
     }
 
     onFacebookLogin() {
-        game.toast("敬请期待");
+        Game.toast("敬请期待");
         // this.login(AccountType.FB, "fbId");
     }
 
     onConnect() {
-        channel.gameClose();
-        channel.gameConnect(this.resp.addr);
+        Game.channel.gameClose();
+        Game.channel.gameConnect(this.resp.addr);
     }
 }

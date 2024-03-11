@@ -1,7 +1,7 @@
 import {_decorator, Label, Node, Button} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
-import {Core} from "db://assets/Script/core/Core";
+import {Game} from "db://assets/Script/example/Game";
 import {
     Ready,
     Leave,
@@ -13,7 +13,7 @@ import {
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
-import {channel} from "db://assets/Script/example/Channel";
+
 import {GameState, TableState} from "db://assets/Script/example/proto/consts";
 
 const {ccclass, property} = _decorator;
@@ -42,7 +42,7 @@ export default class UIWaiting extends UIView {
 
     public onOpen(fromUI: number, ...args: any): void {
         super.onOpen(fromUI, ...args);
-        Core.event.addEventListener("onState", this.onState, this);
+        Game.event.addEventListener("onState", this.onState, this);
         let room = args[0] as Room;
         let [name, roomId] = [room.name, room.roomId];
         this.title.string = `房间信息：名字：${name} 房间ID：${roomId}`;
@@ -51,7 +51,7 @@ export default class UIWaiting extends UIView {
 
     public onClose(): any {
         super.onClose();
-        Core.event.removeEventListener("onState", this.onState, this);
+        Game.event.removeEventListener("onState", this.onState, this);
     }
 
     clear() {
@@ -80,7 +80,7 @@ export default class UIWaiting extends UIView {
 
                         let countDown = tableInfo.waiter.countDown;
                         let readys = tableInfo.waiter.readys;
-                        let uid = Core.storage.getUser();
+                        let uid = Game.storage.getUser();
 
                         // 更新ui，打开游戏界面
                         this.countDown.string = `倒计时：${countDown}`;
@@ -131,7 +131,7 @@ export default class UIWaiting extends UIView {
 
     onReady() {
         let buf = Ready.encode({}).finish();
-        channel.gameNotify("r.ready", buf);
+        Game.channel.gameNotify("r.ready", buf);
     }
 
     onCancel() {
@@ -140,13 +140,13 @@ export default class UIWaiting extends UIView {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = LeaveResp.decode(data.body);
-                Core.log.logNet(resp, "leave返回");
+                Game.log.logNet(resp, "leave返回");
                 if (resp.code == ErrorCode.OK) {
                     uiManager.close();
                 }
             }
         }
-        channel.gameReqest("r.leave", buf, respObject);
+        Game.channel.gameReqest("r.leave", buf, respObject);
     }
 }
 

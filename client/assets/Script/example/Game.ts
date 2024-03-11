@@ -1,9 +1,17 @@
 import {Color, Prefab, Node, director, UITransform, view} from 'cc';
-import {Core} from "db://assets/Script/core/Core";
 import {Notify} from "db://assets/Script/core/ui/Notify";
 import {Tetris} from "db://assets/Script/example/Tetris";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
-import { DEBUG, JSB } from 'cc/env';
+import {DEBUG, JSB} from 'cc/env';
+import {Logger} from "db://assets/Script/core/common/Logger";
+import {HttpRequest} from "db://assets/Script/core/network/HttpRequest";
+import {RandomManager} from "db://assets/Script/core/common/RandomManager";
+import {StorageManager} from "db://assets/Script/core/common/StorageManager";
+import {NetManager} from "db://assets/Script/core/network/NetManager";
+import {EventMgr} from "db://assets/Script/core/common/EventManager";
+import {resLoader} from "db://assets/Script/core/res/ResLoader";
+import {ResUtil} from "db://assets/Script/core/res/ResUtil";
+import {NetChannelManager} from "db://assets/Script/example/Channel";
 
 let colorMap = {
     0: new Color(200, 100, 100),    // 红色
@@ -21,69 +29,90 @@ export function GetTeamColor(teamId): Color {
 export class Game {
 
     // 提示窗
-    toastNode: Node
+    static toastNode: Node;
 
     // 等待窗
-    loadingNode: Node
+    static loadingNode: Node;
 
-    myTetris: Tetris;
+    // 资源加载窗
+    static loadingWithProgressNode: Node;
 
-    constructor() {
+    // core
+    static log = Logger;
+    static http: HttpRequest;
+    static random = RandomManager.instance;
+    static storage: StorageManager;
+    static tcp: NetManager;
+    static event = EventMgr;
+    static res = resLoader;
+    static resUtil = ResUtil;
+    static channel: NetChannelManager
 
-        // 初始化
+    static initGame() {
+        // storage
+        Game.storage = new StorageManager();
+
+        // http连接地址
+        Game.http = new HttpRequest();
+        let url = "http://192.168.8.27:8000";
+        if (!DEBUG) {
+            url = "http://110.40.133.37:8000";
+        }
+        Game.http.server = url;
+
+        // tcp 管理器
+        Game.tcp = new NetManager();
+
+        // tcp的上一层
+        Game.channel = new NetChannelManager();
+        Game.channel.gameCreate();
+
+        // 初始化资源加载
         // loading:0000003C,loading
-        Core.res.load(["Prefab/Toast", "Prefab/Loading"], Prefab, (err, prefabList: Prefab[]) => {
+        Game.res.load(["Prefab/Toast", "Prefab/Loading"], Prefab, (err, prefabList: Prefab[]) => {
             if (err) {
-                Core.log.logView("game constructor load prefab err!!!");
+                Game.log.logView("game constructor load prefab err!!!");
                 return;
             }
-            this.toastNode = Core.resUtil.instantiate(prefabList[0]);
-            let node = Core.resUtil.instantiate(prefabList[1]);
-            let uiCom = node.getComponent(UITransform);
-            uiCom.setContentSize(view.getVisibleSize());
 
+            // toast
+            Game.toastNode = Game.resUtil.instantiate(prefabList[0]);
+
+            // waiting
+            let node = Game.resUtil.instantiate(prefabList[1]);
+            node.name = "loading";
             node.on(Node.EventType.TOUCH_START, function (event: any) {
                 event.propagationStopped = true;
             }, node);
-
-            let child = director.getScene()!.getChildByName('Canvas');
-            child!.addChild(node);
-            uiCom.priority = 100 - 0.01;
-            this.loadingNode = node;
-        })
-
-        // http连接地址
-        let url = "http://192.168.8.27:8000";
-        if(!DEBUG) {
-            url = "http://110.40.133.37:8000";
-        }
-        Core.http.server = url;
+            Game.loadingNode = node;
+        });
     }
 
-    set GameTetris(tetris: Tetris) {
-        this.myTetris = tetris;
-    }
-
-    get GameTetris(): Tetris {
-        return this.myTetris;
-    }
-
-    toast(content: string) {
+    static toast(content: string) {
         let parent = uiManager.getTopUI().node;
-        let node = this.toastNode;
+        let node = Game.toastNode;
         let toastCom = node.getComponent(Notify)!;
         parent.addChild(node);
         toastCom.toast(content);
     }
 
-    openLoading() {
-        this.loadingNode.active = true;
+    static openLoading() {
+        let node = Game.loadingNode;
+
+        let scene = director.getScene();
+        if (!!scene) {
+            let child = scene.getChildByName('Canvas');
+            if (child.getChildByName("loading") == null) {
+                child!.addChild(node);
+                let uiCom = node.getComponent(UITransform);
+                uiCom.setContentSize(view.getVisibleSize());
+                uiCom.priority = 100 - 0.01;
+            }
+        }
+        node.active = true;
     }
 
-    closeLoading() {
-        this.loadingNode.active = false;
+    static closeLoading() {
+        Game.loadingNode.active = false;
     }
-
 }
-
-export let game = new Game();

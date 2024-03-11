@@ -1,7 +1,7 @@
 import {Sprite, _decorator, Label, Component} from "cc";
 import {Profile} from "db://assets/Script/example/proto/client";
 import {ItemType} from "db://assets/Script/example/proto/consts";
-import {Core} from "db://assets/Script/core/Core";
+import {Game} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
 
@@ -22,12 +22,12 @@ export default class UIHeader extends Component {
         this.myName.string = "";
         this.myCoin.string = "";
 
-        Core.event.addEventListener("onUserInfo", this.onUserInfo, this);
+        Game.event.addEventListener("onUserInfo", this.onUserInfo, this);
     }
 
     onDestroy() {
         super.onDestroy();
-        Core.event.removeEventListener("onUserInfo", this.onUserInfo, this);
+        Game.event.removeEventListener("onUserInfo", this.onUserInfo, this);
     }
 
     onUserInfo(event: string, args: any) {

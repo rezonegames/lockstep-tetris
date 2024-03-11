@@ -11,12 +11,12 @@ import {
     TableInfo_Player,
     UpdateFrame
 } from "db://assets/Script/example/proto/client";
-import {Core} from "db://assets/Script/core/Core";
+import {Game} from "db://assets/Script/example/Game";
 import {Tetris} from "db://assets/Script/example/Tetris";
 import {ActionType} from "db://assets/Script/example/proto/consts";
-import {channel} from "db://assets/Script/example/Channel";
+
 import {Block} from "db://assets/Script/example/Block";
-import {game, GetTeamColor} from "db://assets/Script/example/Game";
+import {GetTeamColor} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
 
@@ -60,12 +60,12 @@ export default class UIControl extends UIView {
 
     public onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
-        Core.log.logView(args, "UIControl.onOpen");
-        Core.event.addEventListener("onFrame", this.onFrame, this);
+        Game.log.logView(args, "UIControl.onOpen");
+        Game.event.addEventListener("onFrame", this.onFrame, this);
         let tableInfo = args[0] as TableInfo;
         let room: Room = tableInfo.room;
         this.title.string = room.name
-        Core.random.setSeed(tableInfo.randSeed);
+        Game.random.setSeed(tableInfo.randSeed);
 
         let layoutPrefab = null;
         for(let i=0;i<this.layoutPrefabList.length; i++) {
@@ -76,11 +76,11 @@ export default class UIControl extends UIView {
         }
 
         // 添加布局
-        let parent: Node = Core.resUtil.instantiate(layoutPrefab);
+        let parent: Node = Game.resUtil.instantiate(layoutPrefab);
         this.node.addChild(parent);
 
         // 初始化每个tetris
-        let [i, j, my] = [1, 1, tableInfo.players[Core.storage.getUser()]];
+        let [i, j, my] = [1, 1, tableInfo.players[Game.storage.getUser()]];
         for (const [uid, player] of Object.entries(tableInfo.players)) {
 
             // tetris的container
@@ -100,7 +100,7 @@ export default class UIControl extends UIView {
             console.log(containerName);
 
             let container: Node = parent.getChildByName(containerName);
-            let tNode: Node = Core.resUtil.instantiate(this.tetrisPrefab);
+            let tNode: Node = Game.resUtil.instantiate(this.tetrisPrefab);
             let tetris: Tetris = tNode.getComponent("Tetris") as Tetris;
 
             this.initTetris(player, tetris);
@@ -124,18 +124,18 @@ export default class UIControl extends UIView {
     }
 
     notifyResProgress() {
-        Core.log.logView("", "res.ok");
-        channel.gameNotify("r.loadres", LoadRes.encode({current: 100}).finish());
-        game.closeLoading();
+        Game.log.logView("", "res.ok");
+        Game.channel.gameNotify("r.loadres", LoadRes.encode({current: 100}).finish());
+        Game.closeLoading();
     }
 
     onDestroy() {
         super.onDestroy();
-        Core.event.removeEventListener("onFrame", this.onFrame, this);
+        Game.event.removeEventListener("onFrame", this.onFrame, this);
     }
 
     initItemCtrl(player: TableInfo_Player) {
-        let btn = Core.resUtil.instantiate(this.itemCtrlPrefab);
+        let btn = Game.resUtil.instantiate(this.itemCtrlPrefab);
         btn.getComponent(Sprite).color = GetTeamColor(player.teamId);
         btn.getChildByName("Label").getComponent(Label).string = `T/${player.teamId}`;
         btn.on("click", () => {
@@ -146,8 +146,8 @@ export default class UIControl extends UIView {
             if (children.length > 0) {
                 let node = children[0];
                 let block: Block = node.getComponent("Block") as Block;
-                let [to, from, val] = [player.profile?.userId, Core.storage.getUser(), block.getValue()];
-                Core.log.logView(`player from ${from} send item controller to ${to} value ${block.getValue()}`);
+                let [to, from, val] = [player.profile?.userId, Game.storage.getUser(), block.getValue()];
+                Game.log.logView(`player from ${from} send item controller to ${to} value ${block.getValue()}`);
                 this.serialize(block.getItem(), [val], to, from);
                 this.itemContainer.node.removeChild(node);
             }
@@ -158,12 +158,12 @@ export default class UIControl extends UIView {
     initTetris(player: TableInfo_Player, tetris: Tetris) {
         tetris.onAdded({
             uid: player.profile?.userId,
-            isMy: player.profile?.userId === Core.storage.getUser(),
+            isMy: player.profile?.userId === Game.storage.getUser(),
             teamId: player.teamId,
         });
         // 玩家的所有事件
         ['nextPiece', 'pos', 'end', 'matrix', 'score', 'combo', 'combo_3', 'combo_4'].forEach(key => {
-            let from = Core.storage.getUser() == tetris.player.uid ? 0 : tetris.player.uid;
+            let from = Game.storage.getUser() == tetris.player.uid ? 0 : tetris.player.uid;
             tetris.player.events.on(key, (val) => {
                 switch (key) {
                     case "score":
@@ -186,7 +186,7 @@ export default class UIControl extends UIView {
                     case "combo_4":
                         for (const [_, t] of Object.entries(this.tetrisManager)) {
                             if (t.player.teamId !== tetris.player.teamId) {
-                                let valList = Core.random.getRandomByMinMaxList(0, 11, val);
+                                let valList = Game.random.getRandomByMinMaxList(0, 11, val);
                                 for (let i = 0; i < valList.length; i += 2) {
                                     t.player.addRow(valList.slice(i, i + 2));
                                 }
@@ -207,8 +207,8 @@ export default class UIControl extends UIView {
                         tetris.draw();
                         break;
                     case "item":
-                        if (tetris.player.uid === Core.storage.getUser()) {
-                            let node: Node = Core.resUtil.instantiate(this.blockPrefab);
+                        if (tetris.player.uid === Game.storage.getUser()) {
+                            let node: Node = Game.resUtil.instantiate(this.blockPrefab);
                             let block: Block = node.getComponent("Block") as Block;
                             block.drawValue(val);
                             this.itemContainer.node.addChild(node);
@@ -221,7 +221,7 @@ export default class UIControl extends UIView {
 
     // 发送操作数据
     serialize(action: ActionType, valList: number[], to: number = 0, from: number = 0) {
-        channel.gameNotify("r.update", UpdateFrame.encode({action: {key: action, valList, from, to}}).finish());
+        Game.channel.gameNotify("r.update", UpdateFrame.encode({action: {key: action, valList, from, to}}).finish());
     }
 
     // 解析网络过来的操作数据
@@ -257,9 +257,9 @@ export default class UIControl extends UIView {
                     let [source, target, randList, value] = [from.node.parent, to.node.parent, null, valList[0]];
                     // todo：因为每个设备的动画的执行时间可能不一样，所以要在收到帧数据的时候先random对应的值
                     if (action.key == ActionType.ITEM_ADD_ROW) {
-                        randList = Core.random.getRandomByMinMaxList(0, 11, 2);
+                        randList = Game.random.getRandomByMinMaxList(0, 11, 2);
                     }
-                    let blockNode = Core.resUtil.instantiate(this.blockPrefab);
+                    let blockNode = Game.resUtil.instantiate(this.blockPrefab);
                     let blockScript = blockNode.getComponent("Block") as Block;
                     blockScript.drawValue(value);
                     this.node.addChild(blockNode);
@@ -270,7 +270,7 @@ export default class UIControl extends UIView {
                         sourcePos.z
                     ));
 
-                    Core.log.logView(`player receive item from ${from.player.uid} to ${to.player.uid} value ${value}
+                    Game.log.logView(`player receive item from ${from.player.uid} to ${to.player.uid} value ${value}
                     source ${blockNode.getPosition()} target ${target.getPosition()}`);
                     tween(blockNode).to(1, {position: target.getPosition()})
                         .call(() => {
@@ -347,7 +347,7 @@ export default class UIControl extends UIView {
         number[] {
         // 有buff，是反的
         if (this.my.player.disturbBuff) {
-            val = Core.random.getRandomInt(0, 1) == 0 ? val : -val;
+            val = Game.random.getRandomInt(0, 1) == 0 ? val : -val;
         }
         let valList: number[] = [];
         if (touchCounter <= 4) {

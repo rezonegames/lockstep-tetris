@@ -1,5 +1,6 @@
 .idea/
 bin/demo
+bin/server
 node_modules
 package-lock.json
 temp

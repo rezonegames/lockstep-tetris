@@ -8,11 +8,10 @@ import {
 } from "db://assets/Script/example/proto/client";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
-import {channel} from "db://assets/Script/example/Channel";
+
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {UIID} from "db://assets/Script/example/UIExample";
-import {Core} from "db://assets/Script/core/Core";
-import {game} from "db://assets/Script/example/Game";
+import {Game} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
 
@@ -57,7 +56,7 @@ export default class UIRoom extends UIView {
     }
 
     onBackToHall() {
-        channel.gameReqest("r.leave", Leave.encode({roomId: ""}).finish(), {
+        Game.channel.gameReqest("r.leave", Leave.encode({roomId: ""}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = LeaveResp.decode(data.body);
@@ -70,7 +69,7 @@ export default class UIRoom extends UIView {
 
     onCreateTable() {
         let [tableId, password] = [this.myTableId.string, this.myPassword.string];
-        channel.gameReqest("r.createtable", CreateTable.encode({tableId, password}).finish(), {
+        Game.channel.gameReqest("r.createtable", CreateTable.encode({tableId, password}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = CreateTableResp.decode(data.body);
@@ -78,7 +77,7 @@ export default class UIRoom extends UIView {
                     let tableInfo = resp.table
                     uiManager.open(UIID.UITable, tableInfo);
                 } else {
-                    game.toast("创建失败！！");
+                    Game.toast("创建失败！！");
                 }
             }
         });
@@ -105,7 +104,7 @@ export default class UIRoom extends UIView {
                 }
                 for (let i = 0; i < itemList.length; i++) {
                     let info = itemList[i];
-                    let [tableNode, ok] = children.length - 1 >= i ? [children[i], true] : [Core.resUtil.instantiate(this.tablePrefab), false];
+                    let [tableNode, ok] = children.length - 1 >= i ? [children[i], true] : [Game.resUtil.instantiate(this.tablePrefab), false];
                     tableNode.getChildByName("Label").getComponent(Label).string = `桌子ID：${info.tableId}`;
                     let [players, desc] = [info.players, ""];
                     for (const [uid, player] of Object.entries(players)) {
@@ -130,7 +129,7 @@ export default class UIRoom extends UIView {
     }
 
     joinTable(tableInfo: TableInfo) {
-        channel.gameReqest("r.jointable", JoinTable.encode({tableId: tableInfo.tableId}).finish(), {
+        Game.channel.gameReqest("r.jointable", JoinTable.encode({tableId: tableInfo.tableId}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = JoinTableResp.decode(data.body);
@@ -146,7 +145,7 @@ export default class UIRoom extends UIView {
             return;
         }
 
-        channel.gameReqest("r.getroominfo", GetRoomInfo.encode({roomId: this.roomId}).finish(), {
+        Game.channel.gameReqest("r.getroominfo", GetRoomInfo.encode({roomId: this.roomId}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = GetRoomInfoResp.decode(data.body);

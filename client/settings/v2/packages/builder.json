@@ -74,8 +74,47 @@
           "web": {
             "preferredOptions": {
               "compressionType": "merge_dep",
-              "isRemote": false
+              "isRemote": true
+            },
+            "overwriteSettings": {
+              "web-mobile": {
+                "isRemote": true,
+                "compressionType": "merge_dep"
+              }
             }
+          }
+        }
+      },
+      "default": {
+        "displayName": "i18n:builder.asset_bundle.defaultConfig",
+        "configs": {
+          "native": {
+            "preferredOptions": {
+              "isRemote": false,
+              "compressionType": "merge_dep"
+            }
+          },
+          "web": {
+            "preferredOptions": {
+              "isRemote": true,
+              "compressionType": "merge_dep"
+            },
+            "fallbackOptions": {
+              "compressionType": "merge_dep"
+            },
+            "overwriteSettings": {
+              "web-mobile": {
+                "isRemote": true,
+                "compressionType": "merge_dep"
+              }
+            }
+          },
+          "miniGame": {
+            "fallbackOptions": {
+              "isRemote": false,
+              "compressionType": "merge_dep"
+            },
+            "configMode": "fallback"
           }
         }
       }

@@ -2,11 +2,11 @@ import {UIID} from "../UIExample";
 import {_decorator, Label, Node} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {GetRoomList, GetRoomListResp, Join, JoinResp, Room} from "db://assets/Script/example/proto/client";
-import {Core} from "db://assets/Script/core/Core";
+import {Game} from "db://assets/Script/example/Game";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
-import {channel} from "db://assets/Script/example/Channel";
+
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 import {RoomType} from "db://assets/Script/example/proto/consts";
 
@@ -66,7 +66,7 @@ export default class UIHall extends UIView {
                         target: this,
                         callback: (cmd: number, data: any) => {
                             let resp = JoinResp.decode(data.body);
-                            Core.log.logNet(resp, "快速开始，loading排队");
+                            Game.log.logNet(resp, "快速开始，loading排队");
                             if (resp.code == ErrorCode.OK) {
 
                                 switch (item.type) {
@@ -85,7 +85,7 @@ export default class UIHall extends UIView {
                             }
                         }
                     }
-                    channel.gameReqest("r.join", buf, rspObject);
+                    Game.channel.gameReqest("r.join", buf, rspObject);
                 }, this)
             }
 
@@ -107,6 +107,6 @@ export default class UIHall extends UIView {
                 }
             }
         }
-        channel.gameReqest("r.getroomlist", buf, rspObject);
+        Game.channel.gameReqest("r.getroomlist", buf, rspObject);
     }
 }

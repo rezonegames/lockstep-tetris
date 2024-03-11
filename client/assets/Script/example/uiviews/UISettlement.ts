@@ -14,7 +14,7 @@ import {
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {UIID} from "db://assets/Script/example/UIExample";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
-import {channel} from "db://assets/Script/example/Channel";
+
 import {RoomType} from "db://assets/Script/example/proto/consts";
 
 const {ccclass, property} = _decorator;
@@ -78,7 +78,7 @@ export default class UISettlement extends UIView {
     }
 
     public onClose() {
-        channel.gameReqest("r.leave", Leave.encode({roomId: ""}).finish(), {
+        Game.channel.gameReqest("r.leave", Leave.encode({roomId: ""}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = LeaveResp.decode(data.body);
@@ -90,7 +90,7 @@ export default class UISettlement extends UIView {
     }
 
     public onBackToRoom() {
-        channel.gameReqest("r.standup", StandUp.encode({}).finish(), {
+        Game.channel.gameReqest("r.standup", StandUp.encode({}).finish(), {
             target: this,
             callback: (cmd: number, data: any) => {
                 let resp = StandUpResp.decode(data.body);

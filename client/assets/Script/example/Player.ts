@@ -1,6 +1,6 @@
 import {EventTarget} from "cc";
 import {Arena} from "db://assets/Script/example/Arena";
-import {Core} from "db://assets/Script/core/Core";
+import {Game} from "db://assets/Script/example/Game";
 import {ActionType} from "db://assets/Script/example/proto/consts";
 
 export class Player {
@@ -169,10 +169,10 @@ export class Player {
 
     randomCreateItem(piece, matrix: Array<number>[]) {
         const [h, w] = [matrix.length, matrix[0].length];
-        let [i, j] = [Core.random.getRandomInt(0, h, 1), Core.random.getRandomInt(0, w, 1)];
+        let [i, j] = [Game.random.getRandomInt(0, h, 1), Game.random.getRandomInt(0, w, 1)];
         if (matrix[i][j] != 0) {
             let v = this.colorMap[piece] * 1000
-            matrix[i][j] = v + Core.random.getRandomByObjectList([
+            matrix[i][j] = v + Game.random.getRandomByObjectList([
                 // ActionType.ITEM_BOOM,
                 // ActionType.ITEM_BUFF_DISTURB,
                 ActionType.ITEM_ADD_ROW,
