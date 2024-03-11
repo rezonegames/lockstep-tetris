@@ -3,7 +3,7 @@ import {Core} from "db://assets/Script/core/Core";
 import {Notify} from "db://assets/Script/core/ui/Notify";
 import {Tetris} from "db://assets/Script/example/Tetris";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
-
+import { DEBUG, JSB } from 'cc/env';
 
 let colorMap = {
     0: new Color(200, 100, 100),    // 红色
@@ -38,9 +38,26 @@ export class Game {
                 return;
             }
             this.toastNode = Core.resUtil.instantiate(prefabList[0]);
-            this.loadingNode = Core.resUtil.instantiate(prefabList[1]);
+            let node = Core.resUtil.instantiate(prefabList[1]);
+            let uiCom = node.getComponent(UITransform);
+            uiCom.setContentSize(view.getVisibleSize());
+
+            node.on(Node.EventType.TOUCH_START, function (event: any) {
+                event.propagationStopped = true;
+            }, node);
+
+            let child = director.getScene()!.getChildByName('Canvas');
+            child!.addChild(node);
+            uiCom.priority = 100 - 0.01;
+            this.loadingNode = node;
         })
 
+        // http连接地址
+        let url = "http://192.168.8.27:8000";
+        if(!DEBUG) {
+            url = "http://110.40.133.37:8000";
+        }
+        Core.http.server = url;
     }
 
     set GameTetris(tetris: Tetris) {
@@ -53,7 +70,6 @@ export class Game {
 
     toast(content: string) {
         let parent = uiManager.getTopUI().node;
-        // let node = Core.resUtil.instantiate(this.toastPrefab);
         let node = this.toastNode;
         let toastCom = node.getComponent(Notify)!;
         parent.addChild(node);
@@ -61,23 +77,11 @@ export class Game {
     }
 
     openLoading() {
-        let node = this.loadingNode;
-        let uiCom = node.getComponent(UITransform);
-        uiCom.setContentSize(view.getVisibleSize());
-
-        node.on(Node.EventType.TOUCH_START, function (event: any) {
-            event.propagationStopped = true;
-        }, node);
-
-        let child = director.getScene()!.getChildByName('Canvas');
-        child!.addChild(node);
-        uiCom.priority = 100 - 0.01;
+        this.loadingNode.active = true;
     }
 
     closeLoading() {
-        let node = this.loadingNode;
-        node.removeFromParent();
-        node.active = false;
+        this.loadingNode.active = false;
     }
 
 }

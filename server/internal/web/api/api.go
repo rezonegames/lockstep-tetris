@@ -72,9 +72,17 @@ func QueryHandler(c *gin.Context) {
 			goto EXIT
 		}
 
-		ip, err = z.GetIp()
-		if err != nil {
-			goto EXIT
+		// 内网还是外网ip
+		if config.IsDebug {
+			ip, err = z.GetPrivateIp()
+			if err != nil {
+				goto EXIT
+			}
+		} else {
+			ip, err = z.GetIp()
+			if err != nil {
+				goto EXIT
+			}
 		}
 
 		zweb.Response(c, &proto.AccountLoginResp{

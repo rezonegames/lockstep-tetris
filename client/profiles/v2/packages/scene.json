@@ -1073,10 +1073,46 @@
         "y": 0,
         "z": 0
       }
+    },
+    "1fUATI5UdCKqXDGHksV6XZ": {
+      "position": {
+        "x": 896,
+        "y": 579,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "821P8jbopFR7ETEHmgV8hB": {
+      "position": {
+        "x": 896,
+        "y": 579,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
     }
   },
   "camera-uuids": [
-    "b79BgJKU5BWZ9Z/bR46e9s"
+    "821P8jbopFR7ETEHmgV8hB"
   ],
   "float-window": {
     "position": {
@@ -1112,7 +1148,10 @@
     "aperture": 19,
     "shutter": 7
   },
-  "builder": {},
+  "builder": {
+    "taskOptionsMap": {},
+    "__version__": "1.3.6"
+  },
   "": {
     "sculpt_brush_rotate": 0
   },

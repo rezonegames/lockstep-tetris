@@ -16,7 +16,7 @@ export enum HttpEvent {
 // HTTP请求
 export class HttpRequest {
     // 服务器地址
-    server: string = "http://127.0.0.1/";
+    server: string = "";
     // 请求超时时间
     timeout: number = 10000;
 
@@ -90,7 +90,7 @@ export class HttpRequest {
                              completeCallback?: Function,
                              errorCallback?: Function,
                              timeout: number = this.timeout) {
-        if (name == null || name == '') {
+        if (name == null || name == '' || this.server == '' ) {
             error("请求地址不能为空");
             return;
         }

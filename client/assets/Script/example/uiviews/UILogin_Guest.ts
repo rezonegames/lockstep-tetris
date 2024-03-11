@@ -24,4 +24,8 @@ export default class UILogin_Guest extends UIView {
         this.parent.login(AccountType.DEVICEID, this.accountId.string);
         uiManager.close();
     }
+
+    onCancel() {
+        uiManager.close();
+    }
 }

@@ -34,7 +34,6 @@ export default class UILogin extends UIView {
         tween(this.testSprite.node)
             .to(1, {
                     scale: new Vec3(2, 2, 2),
-                    // position: new Vec3(5, 5, 5)
                 }
             )
             .call(() => {
@@ -42,17 +41,10 @@ export default class UILogin extends UIView {
             })
             .by(1, {
                     scale: new Vec3(-1, -1, -1),
-                    // position: new Vec3(-5, -5, -5)
                 },
                 {easing: 'sineOutIn'}
             )
             .start()
-
-        Core.http.server = `http://192.168.8.27:8000`;
-        Core.http.server = `http://192.168.3.23:8000`;
-        // Core.http.server = `http://192.168.3.69:8000`;
-        // Core.http.server = `http://127.0.0.1:8000`;
-
         channel.gameCreate();
     }
 
