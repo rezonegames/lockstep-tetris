@@ -1,8 +1,7 @@
-import {UIID} from "../UIExample";
 import {_decorator, Label, Node} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {GetRoomList, GetRoomListResp, Join, JoinResp, Room} from "db://assets/Script/example/proto/client";
-import {Game} from "db://assets/Script/example/Game";
+import {Game, UIID} from "db://assets/Script/example/Game";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
 import {ErrorCode} from "db://assets/Script/example/proto/error";

@@ -1,9 +1,7 @@
-import {UIID} from "../UIExample";
 import {Sprite, _decorator, Label, EditBox} from "cc";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 import {LoginToGameResp, RegisterGameReq} from "db://assets/Script/example/proto/client";
-import {CallbackObject} from "db://assets/Script/core/network/NetInterface";
-import {Game} from "db://assets/Script/example/Game";
+import {Game, UIID} from "db://assets/Script/example/Game";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
 

@@ -3,7 +3,9 @@
   "version": {
     "builder": "1.2.3"
   },
-  "log": {},
+  "log": {
+    "level": 1
+  },
   "common": {
     "polyfills": {
       "asyncFunctions": true
@@ -15,24 +17,55 @@
     "startScene": "9cd929f4-07e5-466d-b5bf-a1036c927a6a",
     "mainBundleIsRemote": false,
     "server": "",
-    "useBuiltinServer": false
+    "useBuiltinServer": false,
+    "scenes": [
+      {
+        "url": "db://assets/Scene/example_ui.scene",
+        "uuid": "9cd929f4-07e5-466d-b5bf-a1036c927a6a"
+      }
+    ],
+    "md5Cache": true,
+    "useSplashScreen": true
   },
   "BuildTaskManager": {
     "taskMap": {
-      "1710041050926": {
+      "buildBundle": {
+        "id": "buildBundle",
+        "progress": 1,
+        "state": "success",
+        "message": "2024-3-12 17:53:56Build Bundle success in 7886 ms!",
+        "options": {
+          "dest": "project://build/build-bundle",
+          "buildTaskIds": [
+            "1710041050926"
+          ],
+          "taskName": "build bundle db://assets/Texture",
+          "bundleConfigs": [
+            {
+              "root": "db://assets/Texture",
+              "name": "Texture",
+              "output": true
+            }
+          ],
+          "packages": {}
+        },
+        "time": "",
+        "type": "bundle"
+      },
+      "1710247365837": {
         "type": "build",
-        "id": "1710041050926",
+        "id": "1710247365837",
         "progress": 1,
         "state": "success",
         "stage": "build",
-        "message": "2024-3-10 12:43:25 build success in 28545 ms!",
+        "message": "2024-3-13 21:00:45 build success in 91506 ms!",
         "options": {
           "name": "cocos_creator_framework",
           "server": "",
           "platform": "web-mobile",
           "buildPath": "project://build",
           "debug": false,
-          "md5Cache": false,
+          "md5Cache": true,
           "skipCompressTexture": false,
           "sourceMaps": false,
           "polyfills": {
@@ -52,18 +85,6 @@
           "taskName": "web-mobile",
           "scenes": [
             {
-              "url": "db://assets/scene.scene",
-              "uuid": "b6005edf-d0b4-450a-8b4a-bd855af18c4f"
-            },
-            {
-              "url": "db://assets/Scene/example_res.scene",
-              "uuid": "95a253de-483f-4725-aacb-10f85609785e"
-            },
-            {
-              "url": "db://assets/Scene/example_res_keeper.scene",
-              "uuid": "4753fa27-55ac-44df-94a5-a91c50b1cd4d"
-            },
-            {
               "url": "db://assets/Scene/example_ui.scene",
               "uuid": "9cd929f4-07e5-466d-b5bf-a1036c927a6a"
             }
@@ -71,9 +92,9 @@
           "packages": {},
           "__version__": "1.3.6",
           "buildMode": "normal",
-          "logDest": "project://temp/builder/log/web-mobile3-10-2024 11-24.log"
+          "logDest": "project://temp/builder/log/web-mobile3-12-2024 20-42.log"
         },
-        "time": "3-10-2024 12:42:56",
+        "time": "3-13-2024 20:59:14",
         "dirty": false
       }
     }

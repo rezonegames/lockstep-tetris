@@ -175,7 +175,7 @@
     "_string": "账号：",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 30,
+    "_actualFontSize": 42,
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -507,7 +507,7 @@
     "_string": "输入账号....",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 20,
+    "_actualFontSize": 28,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -881,7 +881,7 @@
     "_string": "确定",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 20,
+    "_actualFontSize": 28,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -1635,6 +1635,7 @@
       "__id__": 0
     },
     "fileId": "860vOsNRpLr6wEJewP92DW",
-    "instance": null
+    "instance": null,
+    "targetOverrides": null
   }
 ]

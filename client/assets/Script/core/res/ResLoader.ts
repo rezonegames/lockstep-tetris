@@ -140,6 +140,18 @@ export default class ResLoader {
     public loadRemote(url: string, ...args: any): void {
         assetManager.loadRemote(url, args);
     }
+
+    /**
+     * 获取资源
+     * @param path          资源路径
+     * @param type          资源类型
+     * @param bundleName    远程资源包名
+     */
+    get<T extends Asset>(path: string, type?: __private._types_globals__Constructor<T> | null, bundleName?: string): T | null {
+        if (bundleName == null) return null;
+        let bundle: AssetManager.Bundle = assetManager.getBundle(bundleName)!;
+        return bundle.get(path, type);
+    }
 }
 
 export let resLoader = new ResLoader();

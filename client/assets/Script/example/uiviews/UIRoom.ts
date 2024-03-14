@@ -10,8 +10,7 @@ import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
-import {UIID} from "db://assets/Script/example/UIExample";
-import {Game} from "db://assets/Script/example/Game";
+import {Game, UIID} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
 

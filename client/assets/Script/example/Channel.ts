@@ -21,10 +21,9 @@ import {WebSock} from "db://assets/Script/core/network/WebSock";
 import {director, Label, Node, view} from "cc";
 import {GameState, TableState} from "db://assets/Script/example/proto/consts";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
-import {UIID} from "db://assets/Script/example/UIExample";
 import {EventMgr} from "db://assets/Script/core/common/EventManager";
 import UIControl from "db://assets/Script/example/uiviews/UIControl";
-import {Game} from "db://assets/Script/example/Game";
+import {Game, UIID} from "db://assets/Script/example/Game";
 
 enum NetChannelType {
     Gate = 0,

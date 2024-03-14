@@ -197,6 +197,7 @@ var (
 	args = flag.String("args", "1-1 1 1", "room robot.count mode")
 )
 
+// TestGame go test -v --run=TestGame --args="1-1 1 1"
 func TestGame(t *testing.T) {
 	// wait server startup
 	flag.Parse()

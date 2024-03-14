@@ -4,9 +4,8 @@ import {ErrorCode} from "db://assets/Script/example/proto/error";
 import {AccountType} from "db://assets/Script/example/proto/consts";
 import {UIView} from "db://assets/Script/core/ui/UIView";
 
-import {Game} from "db://assets/Script/example/Game";
+import {Game, UIID} from "db://assets/Script/example/Game";
 import {uiManager} from "db://assets/Script/core/ui/UIManager";
-import {UIID} from "db://assets/Script/example/UIExample";
 
 const {ccclass, property} = _decorator;
 

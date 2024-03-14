@@ -40,7 +40,7 @@ export class UIView extends ResKeeper {
     // preventTouch: boolean = true;
     /** 缓存选项 */
     @property
-    cache: boolean = false;
+    cache: boolean = true;
     /** 界面显示类型 */
     @property({ type: Enum(UIShowTypes) })
     showType: UIShowTypes = UIShowTypes.UISingle;

@@ -38,7 +38,7 @@ export default class UITable extends UIView {
 
         // 生成6个座位，
         let transform = this.table.getComponent(UITransform);
-        let [width, height, offsetW, offsetH] = [transform.width, transform.height, 90, 80];
+        let [width, height, offsetW, offsetH] = [transform.width, transform.height, 90, 75];
         let posList: Vec3[] = [
             new Vec3(-width / 2 + offsetW, 0, 0), new Vec3(width / 2 - offsetW, 0, 0),
             new Vec3(-offsetW, height / 2 - offsetH, 0), new Vec3(offsetW, height / 2 - offsetH, 0),

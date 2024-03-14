@@ -12,10 +12,10 @@ import {
     TableInfo_Player
 } from "db://assets/Script/example/proto/client";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
-import {UIID} from "db://assets/Script/example/UIExample";
 import {ErrorCode} from "db://assets/Script/example/proto/error";
 
 import {RoomType} from "db://assets/Script/example/proto/consts";
+import {Game, UIID} from "db://assets/Script/example/Game";
 
 const {ccclass, property} = _decorator;
 

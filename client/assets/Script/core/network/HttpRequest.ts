@@ -56,6 +56,7 @@ export class HttpRequest {
 
         xhr.onerror = () => {
             console.log(`${url} onerror readyState:${xhr.readyState} status:${xhr.status} ${xhr.response}`);
+            console.log(xhr);
             this.deleteCache(url);
             if (errorCallback == null) return;
             if (xhr.readyState == 0 || xhr.readyState == 1 || xhr.status == 0) {

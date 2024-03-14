@@ -12,12 +12,20 @@
       "startScene": "9cd929f4-07e5-466d-b5bf-a1036c927a6a",
       "mainBundleIsRemote": false,
       "server": "",
-      "useBuiltinServer": false
+      "useBuiltinServer": false,
+      "scenes": [
+        {
+          "url": "db://assets/Scene/example_ui.scene",
+          "uuid": "9cd929f4-07e5-466d-b5bf-a1036c927a6a"
+        }
+      ],
+      "md5Cache": true,
+      "useSplashScreen": true
     },
     "options": {
       "web-mobile": {
         "orientation": "landscape",
-        "embedWebDebugger": false,
+        "embedWebDebugger": true,
         "cullEngineAsmJsModule": false,
         "__version__": "1.0.1"
       }
@@ -26,6 +34,18 @@
       "1710041050926": {
         "orientation": "landscape",
         "embedWebDebugger": false,
+        "cullEngineAsmJsModule": false,
+        "__version__": "1.0.1"
+      },
+      "1710246989589": {
+        "orientation": "landscape",
+        "embedWebDebugger": false,
+        "cullEngineAsmJsModule": false,
+        "__version__": "1.0.1"
+      },
+      "1710247365837": {
+        "orientation": "landscape",
+        "embedWebDebugger": true,
         "cullEngineAsmJsModule": false,
         "__version__": "1.0.1"
       }

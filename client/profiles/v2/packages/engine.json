@@ -5,6 +5,14 @@
       "1710041050926": {
         "cleanupImageCache": "inheritProjectSetting",
         "__version__": "1.0.7"
+      },
+      "1710246989589": {
+        "cleanupImageCache": "inheritProjectSetting",
+        "__version__": "1.0.7"
+      },
+      "1710247365837": {
+        "cleanupImageCache": "inheritProjectSetting",
+        "__version__": "1.0.7"
       }
     },
     "__version__": "1.3.6"

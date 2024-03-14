@@ -1,8 +1,7 @@
 import {Color, Prefab, Node, director, UITransform, view} from 'cc';
 import {Notify} from "db://assets/Script/core/ui/Notify";
-import {Tetris} from "db://assets/Script/example/Tetris";
-import {uiManager} from "db://assets/Script/core/ui/UIManager";
-import {DEBUG, JSB} from 'cc/env';
+import {UIConf, uiManager} from "db://assets/Script/core/ui/UIManager";
+import {DEBUG} from 'cc/env';
 import {Logger} from "db://assets/Script/core/common/Logger";
 import {HttpRequest} from "db://assets/Script/core/network/HttpRequest";
 import {RandomManager} from "db://assets/Script/core/common/RandomManager";
@@ -26,6 +25,31 @@ export function GetTeamColor(teamId): Color {
     return colorMap[teamId];
 }
 
+export enum UIID {
+    UILogin,
+    UILogin_Guest,
+    UIRegister,
+    UIHall,
+    UIRoom,
+    UITable,
+    UINotice,
+    UIWaiting,
+    UIControl,
+    UISettlement
+}
+
+export let UICF: { [key: number]: UIConf } = {
+    [UIID.UILogin]: {prefab: "Prefab/Login"},
+    [UIID.UILogin_Guest]: {prefab: "Prefab/Login_Guest", preventTouch: true},
+    [UIID.UIHall]: {prefab: "Prefab/Hall"},
+    [UIID.UIRoom]: {prefab: "Prefab/Room"},
+    [UIID.UITable]: {prefab: "Prefab/Table"},
+    [UIID.UIRegister]: {prefab: "Prefab/Register"},
+    [UIID.UIWaiting]: {prefab: "Prefab/Waiting"},
+    [UIID.UIControl]: {prefab: "Prefab/Control", preventTouch: true},
+    [UIID.UISettlement]: {prefab: "Prefab/Settlement"},
+}
+
 export class Game {
 
     // 提示窗
@@ -33,9 +57,6 @@ export class Game {
 
     // 等待窗
     static loadingNode: Node;
-
-    // 资源加载窗
-    static loadingWithProgressNode: Node;
 
     // core
     static log = Logger;
@@ -49,6 +70,7 @@ export class Game {
     static channel: NetChannelManager
 
     static initGame() {
+
         // storage
         Game.storage = new StorageManager();
 
@@ -67,25 +89,32 @@ export class Game {
         Game.channel = new NetChannelManager();
         Game.channel.gameCreate();
 
+        let scene = director.getScene();
+        let canvas = scene.getChildByName('Canvas');
+
         // 初始化资源加载
-        // loading:0000003C,loading
-        Game.res.load(["Prefab/Toast", "Prefab/Loading"], Prefab, (err, prefabList: Prefab[]) => {
-            if (err) {
-                Game.log.logView("game constructor load prefab err!!!");
-                return;
-            }
+        let toastPrefab = Game.res.get("Prefab/Toast", Prefab, "resources");
+        Game.toastNode = Game.resUtil.instantiate(toastPrefab);
 
-            // toast
-            Game.toastNode = Game.resUtil.instantiate(prefabList[0]);
+        // waiting
+        let loadingPrefab = Game.res.get("Prefab/Loading", Prefab, "resources");
+        let node = Game.resUtil.instantiate(loadingPrefab);
+        node.name = "loading";
+        let uiCom = node.getComponent(UITransform);
+        uiCom.setContentSize(view.getVisibleSize());
+        uiCom.priority = 100 - 0.01;
+        node.on(Node.EventType.TOUCH_START, function (event: any) {
+            event.propagationStopped = true;
+        }, node);
+        Game.loadingNode = node;
 
-            // waiting
-            let node = Game.resUtil.instantiate(prefabList[1]);
-            node.name = "loading";
-            node.on(Node.EventType.TOUCH_START, function (event: any) {
-                event.propagationStopped = true;
-            }, node);
-            Game.loadingNode = node;
-        });
+        // 背景
+        let backgroundPrefab = Game.res.get("Prefab/background", Prefab, "resources");
+        canvas.addChild(Game.resUtil.instantiate(backgroundPrefab));
+
+        // 初始化界面
+        uiManager.initUIConf(UICF);
+        uiManager.open(UIID.UILogin);
     }
 
     static toast(content: string) {
@@ -98,17 +127,6 @@ export class Game {
 
     static openLoading() {
         let node = Game.loadingNode;
-
-        let scene = director.getScene();
-        if (!!scene) {
-            let child = scene.getChildByName('Canvas');
-            if (child.getChildByName("loading") == null) {
-                child!.addChild(node);
-                let uiCom = node.getComponent(UITransform);
-                uiCom.setContentSize(view.getVisibleSize());
-                uiCom.priority = 100 - 0.01;
-            }
-        }
         node.active = true;
     }
 
