@@ -11,23 +11,30 @@ export default class UIExample extends Component {
     @property(ProgressBar)
     loadingProgressBar: ProgressBar;
 
+    progress: number
+    total: number
+
     onLoad() {
     }
 
     start() {
-        resLoader.loadDir("resources", "Prefab",
-            (finished: number, total: number, item: any) => {
-                let progress = finished / total;
-                if (progress > this.loadingProgressBar.progress) {
-                    this.loadingProgressBar.progress = progress;
-                }
-            },
-            () => {
-                this.loadingProgressBar.node.active = false;
+        let [total, taskList] = [3, ["anim", "Texture", "Prefab"]];
+
+        const onProgress = (finished: number, total: number, item: any) => {
+        }
+        const onFinish = () => {
+            let dir = taskList.pop();
+            this.loadingProgressBar.progress = total - taskList.length / total;
+            if (!dir) {
                 Game.initGame();
                 console.log("finished");
+                this.loadingProgressBar.node.active = false;
+            } else {
+                resLoader.loadDir("bundle1", dir, onProgress.bind(this), onFinish.bind(this));
             }
-        )
+        }
+
+        resLoader.loadDir("bundle1", taskList[0], onProgress.bind(this), onFinish.bind(this));
     }
 
 }

@@ -34,6 +34,7 @@ export default class UIRegister extends UIView {
                 let resp = LoginToGameResp.decode(data.body);
                 Game.log.logNet(resp, "注册游戏账号");
                 if (resp.code == ErrorCode.OK) {
+                    Game.storage.setUser(resp.profile?.userId);
                     Game.event.raiseEvent("onUserInfo", resp.profile);
                     uiManager.replace(UIID.UIHall);
                 }

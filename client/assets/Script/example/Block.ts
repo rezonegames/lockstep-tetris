@@ -1,4 +1,5 @@
-import {_decorator, Component, Sprite, SpriteFrame} from 'cc';
+import {_decorator, Component, Sprite, SpriteFrame, Label} from 'cc';
+import {ActionType} from "db://assets/Script/example/proto/consts";
 
 const {ccclass, property} = _decorator;
 
@@ -8,8 +9,8 @@ export class Block extends Component {
     @property(Sprite)
     bgSprite: Sprite
 
-    @property(Sprite)
-    itemSprite: Sprite
+    @property(Label)
+    itemLabel: Label
 
     value: number
     color: number
@@ -22,16 +23,23 @@ export class Block extends Component {
     drawValue(value: number) {
         this.value = value;
         if (value > 1000) {
-            let [color, item] = [Math.floor(value / 1000), Math.floor(value % 1000)];
+            let [color, item, str] = [Math.floor(value / 1000), Math.floor(value % 1000), ""];
             this.bgSprite.spriteFrame = this.spriteArray[color];
-            this.itemSprite.node.active = true;
-            this.itemSprite.spriteFrame = this.spriteArray[item];
+            switch (item) {
+                case ActionType.ITEM_ADD_ROW:
+                    str = "+1";
+                    break;
+                case ActionType.ITEM_DEL_ROW:
+                    str = "-1";
+                    break;
+            }
+            this.itemLabel.string = str;
+            this.itemLabel.node.active = true;
             this.color = color;
             this.item = item;
         } else {
             this.bgSprite.spriteFrame = this.spriteArray[value];
-            this.itemSprite.node.active = false;
-            this.itemSprite.spriteFrame = null;
+            this.itemLabel.node.active = false;
             this.color = value;
             this.item = 0;
         }
@@ -39,7 +47,7 @@ export class Block extends Component {
 
     drawNull() {
         this.bgSprite.spriteFrame = null;
-        this.itemSprite.spriteFrame = null;
+        this.itemLabel.node.active = false;
     }
 
     drawShadow() {

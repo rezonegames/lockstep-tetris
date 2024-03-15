@@ -18,28 +18,11 @@ export default class UILogin extends UIView {
     @property(Node)
     private connect: Node
 
-    @property(Sprite)
-    private testSprite: Sprite
-
     private resp: AccountLoginResp
 
     onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
         this.clearConnect();
-        tween(this.testSprite.node)
-            .to(1, {
-                    scale: new Vec3(2, 2, 2),
-                }
-            )
-            .call(() => {
-                console.log('This is a callback');
-            })
-            .by(1, {
-                    scale: new Vec3(-1, -1, -1),
-                },
-                {easing: 'sineOutIn'}
-            )
-            .start()
     }
 
     clearConnect() {
@@ -52,6 +35,9 @@ export default class UILogin extends UIView {
         let name = resp.name;
         if (resp.userId == 0) {
             name = "无账号，登录游戏后注册";
+        } else {
+            // 账号基本信息保存在本地
+            Game.storage.setUser(resp.userId);
         }
         this.uri.string = name;
         this.connect.active = true
@@ -66,11 +52,8 @@ export default class UILogin extends UIView {
                 let resp = AccountLoginResp.decode(response);
                 Game.log.logNet(resp, "登录");
                 if (resp.code == ErrorCode.OK) {
-                    this.setConnect(resp);
-                    // 账号基本信息保存在本地
-                    Game.storage.setUser(resp.userId);
                     Game.storage.set("accountId", accountId);
-                    Game.storage.set("adder", resp.addr);
+                    this.setConnect(resp);
                 }
             }
         );

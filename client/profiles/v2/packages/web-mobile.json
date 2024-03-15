@@ -7,7 +7,7 @@
       },
       "buildPath": "project://build",
       "outputName": "web-mobile",
-      "mainBundleCompressionType": "merge_dep",
+      "mainBundleCompressionType": "merge_all_json",
       "platform": "web-mobile",
       "startScene": "9cd929f4-07e5-466d-b5bf-a1036c927a6a",
       "mainBundleIsRemote": false,
@@ -20,7 +20,30 @@
         }
       ],
       "md5Cache": true,
-      "useSplashScreen": true
+      "useSplashScreen": true,
+      "debug": true,
+      "bundleConfigs": [
+        {
+          "name": "main",
+          "root": "",
+          "output": true
+        },
+        {
+          "name": "internal",
+          "root": "",
+          "output": true
+        },
+        {
+          "name": "start-scene",
+          "root": "",
+          "output": true
+        },
+        {
+          "root": "db://assets/bundle1",
+          "name": "bundle1",
+          "output": true
+        }
+      ]
     },
     "options": {
       "web-mobile": {
@@ -44,6 +67,12 @@
         "__version__": "1.0.1"
       },
       "1710247365837": {
+        "orientation": "landscape",
+        "embedWebDebugger": true,
+        "cullEngineAsmJsModule": false,
+        "__version__": "1.0.1"
+      },
+      "1710504212594": {
         "orientation": "landscape",
         "embedWebDebugger": true,
         "cullEngineAsmJsModule": false,

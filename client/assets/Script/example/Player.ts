@@ -6,6 +6,7 @@ import {ActionType} from "db://assets/Script/example/proto/consts";
 export class Player {
 
     uid: number
+    name: string
     teamId: number
     pos: { x: number, y: number } // 位置
     matrix: Array<number>[] // 方块形状及位置
@@ -22,7 +23,7 @@ export class Player {
     colorMap
     dropCounter
 
-    constructor(arena: Arena, uid: number, teamId: number) {
+    constructor(arena: Arena, uid: number, teamId: number, name: string) {
         this.pos = {x: 0, y: 0};
         this.score = 0;
         this.arena = arena;
@@ -30,6 +31,7 @@ export class Player {
         this.index = 0;
         this.combo = 0;
         this.teamId = teamId;
+        this.name = name;
         // 方块
         this.pieces = 'ILJOTSZ';
         this.colorMap = {

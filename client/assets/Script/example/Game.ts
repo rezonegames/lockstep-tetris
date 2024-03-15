@@ -38,16 +38,18 @@ export enum UIID {
     UISettlement
 }
 
+const bundle = "bundle1"
+
 export let UICF: { [key: number]: UIConf } = {
-    [UIID.UILogin]: {prefab: "Prefab/Login"},
-    [UIID.UILogin_Guest]: {prefab: "Prefab/Login_Guest", preventTouch: true},
-    [UIID.UIHall]: {prefab: "Prefab/Hall"},
-    [UIID.UIRoom]: {prefab: "Prefab/Room"},
-    [UIID.UITable]: {prefab: "Prefab/Table"},
-    [UIID.UIRegister]: {prefab: "Prefab/Register"},
-    [UIID.UIWaiting]: {prefab: "Prefab/Waiting"},
-    [UIID.UIControl]: {prefab: "Prefab/Control", preventTouch: true},
-    [UIID.UISettlement]: {prefab: "Prefab/Settlement"},
+    [UIID.UILogin]: {bundle, prefab: "Prefab/Login"},
+    [UIID.UILogin_Guest]: {bundle, prefab: "Prefab/Login_Guest", preventTouch: true},
+    [UIID.UIHall]: {bundle, prefab: "Prefab/Hall"},
+    [UIID.UIRoom]: {bundle, prefab: "Prefab/Room"},
+    [UIID.UITable]: {bundle, prefab: "Prefab/Table"},
+    [UIID.UIRegister]: {bundle, prefab: "Prefab/Register"},
+    [UIID.UIWaiting]: {bundle, prefab: "Prefab/Waiting"},
+    [UIID.UIControl]: {bundle, prefab: "Prefab/Control", preventTouch: true},
+    [UIID.UISettlement]: {bundle, prefab: "Prefab/Settlement"},
 }
 
 export class Game {
@@ -76,7 +78,8 @@ export class Game {
 
         // http连接地址
         Game.http = new HttpRequest();
-        let url = "http://192.168.8.27:8000";
+        let url = "http://127.0.0.1:8000";
+        url = "http://110.40.133.37:8000";
         if (!DEBUG) {
             url = "http://110.40.133.37:8000";
         }
@@ -93,11 +96,11 @@ export class Game {
         let canvas = scene.getChildByName('Canvas');
 
         // 初始化资源加载
-        let toastPrefab = Game.res.get("Prefab/Toast", Prefab, "resources");
+        let toastPrefab = Game.res.get("Prefab/Toast", Prefab, "bundle1");
         Game.toastNode = Game.resUtil.instantiate(toastPrefab);
 
         // waiting
-        let loadingPrefab = Game.res.get("Prefab/Loading", Prefab, "resources");
+        let loadingPrefab = Game.res.get("Prefab/Loading", Prefab, "bundle1");
         let node = Game.resUtil.instantiate(loadingPrefab);
         node.name = "loading";
         let uiCom = node.getComponent(UITransform);
@@ -109,7 +112,7 @@ export class Game {
         Game.loadingNode = node;
 
         // 背景
-        let backgroundPrefab = Game.res.get("Prefab/background", Prefab, "resources");
+        let backgroundPrefab = Game.res.get("Prefab/background", Prefab, "bundle1");
         canvas.addChild(Game.resUtil.instantiate(backgroundPrefab));
 
         // 初始化界面

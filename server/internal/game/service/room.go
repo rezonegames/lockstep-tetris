@@ -6,6 +6,7 @@ import (
 	"tetris/config"
 	"tetris/internal/game/util"
 	"tetris/models"
+	"tetris/pkg/log"
 	"tetris/proto/proto"
 )
 
@@ -33,7 +34,7 @@ func (r *RoomService) AfterInit() {
 				RoomId: roomId,
 			})
 			if err != nil {
-				//log.Info("player %d leave room %s err", s.UID(), roomId)
+				log.Info("player %d leave room %s err", s.UID(), roomId)
 			}
 		}
 	})
@@ -431,6 +432,7 @@ func (r *RoomService) ResumeTable(s *session.Session, msg *proto.ResumeTable) er
 	})
 
 EXIT:
+	models.RemoveRoundSession(uid)
 	return s.Response(&proto.ResumeTableResp{
 		Code: proto.ErrorCode_UnknownError,
 	})

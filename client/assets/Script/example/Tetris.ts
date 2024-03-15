@@ -10,44 +10,6 @@ const {ccclass, property} = _decorator;
 @ccclass('Tetris')
 export class Tetris extends Component {
 
-    // 方块
-    @property(Prefab)
-    block: Prefab
-
-    // 图片
-    @property([SpriteFrame])
-    spriteArray: SpriteFrame[]
-
-    // canvas
-    @property(Node)
-    canvas: Node
-
-    // canvas上所有的节点
-    @property(Node)
-    itemArray: Node[][] = [];
-
-    // top
-    @property(Widget)
-    top: Widget
-
-    // 区域
-    arena: Arena
-
-    // player
-    player: Player
-
-    // 分数
-    @property(Label)
-    score: Label
-
-    // 下一个方块
-    @property(Node)
-    nextArray: Node[][] = [];
-
-    @property(Node)
-    next: Node
-    nextMatrix: Array<number>[]
-
     // tetris属性
     config: { w: number, h: number, bw: number, bh: number } = {
         w: 12,
@@ -59,19 +21,64 @@ export class Tetris extends Component {
     begin
     isMy
 
+    @property(Prefab)
+    blockPrefab: Prefab;
+
+    // 区域
+    arena: Arena
+
+    // player
+    player: Player
+
+    // canvas方块
+    @property(Node)
+    canvas: Node
+    itemArray: Node[][] = [];
+
+    // top
+    @property(Widget)
+    top: Widget
+
+    // 分数
+    @property(Label)
+    score: Label
+
+    // 下一个方块
+    @property(Node)
+    next: Node
+    nextArray: Node[][] = [];
+    nextMatrix: Array<number>[];
+
+    // info
+    @property(Label)
+    info: Label
+
     updateScore(score: number) {
         this.score.string = `分数：${score}`;
     }
 
     onAdded(args: any) {
         // 创建
-        this.isMy = args.isMy;
+        let {
+            isMy,
+            uid,
+            teamId,
+            name
+        } = args;
+
         this.arena = new Arena(this.config.w, this.config.h);
-        this.player = new Player(this.arena, args.uid, args.teamId);
+        this.player = new Player(this.arena, uid, teamId, name);
+        this.isMy = isMy;
         this.begin = true;
     }
 
     start() {
+
+        this.info.string = `ID：${this.player.uid}
+LEVEL：*****
+NAME：${this.player.name}
+        `;
+
         // 背景颜色
         this.getComponent(Sprite).color = GetTeamColor(this.player.teamId);
         const matrix = this.arena.matrix;
@@ -79,7 +86,7 @@ export class Tetris extends Component {
         matrix.forEach((row, y) => {
             this.itemArray[y] = []
             row.forEach((value, x) => {
-                let item: Node = Game.resUtil.instantiate(this.block);
+                let item: Node = Game.resUtil.instantiate(this.blockPrefab);
                 this.canvas.addChild(item);
                 item.setPosition(-w / 2 + x * bw + bw / 2, h / 2 - (y + 1) * bh + bh / 2);
                 this.itemArray[y][x] = item;
@@ -95,13 +102,15 @@ export class Tetris extends Component {
         ];
         const [w1, h1, bw1, bh1] = [this.config.bw / 2 * 4 + 4, this.config.bh / 2 * 4 + 4, this.config.bw / 2, this.config.bh / 2]
         this.nextMatrix.forEach((row, y) => {
-            this.nextArray[y] = []
+            this.nextArray[y] = [];
             row.forEach((value, x) => {
-                let item: Node = Game.resUtil.instantiate(this.block);
+                let item: Node = Game.resUtil.instantiate(this.blockPrefab);
                 item.getComponent(UITransform).setContentSize(bw1, bh1)
                 this.next.addChild(item);
                 item.setPosition(-w1 / 2 + x * bw1 + bw1 / 2, h1 / 2 - (y + 1) * bh1 + bh1 / 2);
                 this.nextArray[y][x] = item;
+
+                item.setScale(0.5, 0.5);
             })
         });
 
@@ -173,14 +182,15 @@ export class Tetris extends Component {
     drawNextMatrix() {
         this.nextMatrix.forEach((row, y) => {
             row.forEach((value, x) => {
-                this.nextArray[y][x].getComponent(Sprite).spriteFrame = null;
+                let block: Block = this.getBlockScript(this.nextArray[y][x]);
+                block.drawNull();
             });
         });
         const matrix = this.player.getNextPiece();
         matrix.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value != 0) {
-                    let block: Block = this.getBlockScript(this.itemArray[y][x]);
+                    let block: Block = this.getBlockScript(this.nextArray[y][x]);
                     block.drawValue(value);
                 }
             });

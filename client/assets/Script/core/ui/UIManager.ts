@@ -186,14 +186,14 @@ export class UIManager {
         }
 
         // 找到UI配置
-        let uiPath = this.UIConf[uiId].prefab;
-        if (null == uiPath) {
-            log(`getOrCreateUI ${uiId} faile, prefab conf not found!`);
+        let [bundle, uiPath] = [this.UIConf[uiId].bundle ,this.UIConf[uiId].prefab];
+        if (null == uiPath || null == bundle ) {
+            log(`getOrCreateUI ${uiId} faile, prefab/bundle conf not found!`);
             completeCallback(null);
             return;
         }
 
-        resLoader.load(uiPath, processCallback, (err:Error, prefab:Prefab) => {
+        resLoader.load(bundle, uiPath, processCallback, (err:Error, prefab:Prefab) => {
             // 检查加载资源错误
             if (err) {
                 log(`getOrCreateUI loadRes ${uiId} faile, path: ${uiPath} error: ${err}`);
@@ -492,6 +492,7 @@ export class UIManager {
                     this.UICache[uiId] = uiView;
                     uiView.node.removeFromParent();
                 } else {
+
                     uiView.releaseAssets();
                     uiView.node.destroy();
                 }

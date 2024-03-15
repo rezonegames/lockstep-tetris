@@ -3,7 +3,7 @@ import {UIView} from "db://assets/Script/core/ui/UIView";
 import {
     CreateTable, CreateTableResp,
     GetRoomInfo,
-    GetRoomInfoResp, JoinTable, JoinTableResp, Leave, LeaveResp, Ready,
+    GetRoomInfoResp, JoinTable, JoinTableResp, Leave, LeaveResp,
     Room, TableInfo
 } from "db://assets/Script/example/proto/client";
 import {ListView} from "db://assets/Script/core/components/scrollview/ListView";
@@ -23,9 +23,6 @@ export default class UIRoom extends UIView {
     @property(Label)
     private info: Label
 
-    @property(Prefab)
-    private tablePrefab: Prefab
-
     @property(EditBox)
     private myTableId: EditBox
 
@@ -36,10 +33,14 @@ export default class UIRoom extends UIView {
 
     roomId: string
 
+    @property(Prefab)
+    private tablePrefab: Prefab;
+
     public onOpen(fromUI: number, ...args: any): void {
         super.onOpen(fromUI, ...args);
         let room = args[0] as Room;
         this.roomId = room.roomId;
+
         setTimeout(() => {
             this.getRoomInfo();
         }, 100);
@@ -85,7 +86,7 @@ export default class UIRoom extends UIView {
     refreshTableList(tableList: TableInfo[]) {
         // 以三个为一组，再次分组
         let groupedLists = [];
-        tableList = tableList.sort( (a: TableInfo, b: TableInfo) => {
+        tableList = tableList.sort((a: TableInfo, b: TableInfo) => {
             return a.createTime - b.createTime;
         })
         for (let i = 0; i < tableList.length; i += 5) {
@@ -101,9 +102,12 @@ export default class UIRoom extends UIView {
                     let tableNode = children[i];
                     tableNode.active = false;
                 }
+
                 for (let i = 0; i < itemList.length; i++) {
                     let info = itemList[i];
-                    let [tableNode, ok] = children.length - 1 >= i ? [children[i], true] : [Game.resUtil.instantiate(this.tablePrefab), false];
+                    let [tableNode, ok] = children.length - 1 >= i ? [children[i], true] : [
+                        Game.resUtil.instantiate(this.tablePrefab), false
+                    ];
                     tableNode.getChildByName("Label").getComponent(Label).string = `桌子ID：${info.tableId}`;
                     let [players, desc] = [info.players, ""];
                     for (const [uid, player] of Object.entries(players)) {
@@ -140,7 +144,7 @@ export default class UIRoom extends UIView {
     }
 
     getRoomInfo() {
-        if(!uiManager.isTopUI(UIID.UIRoom)) {
+        if (!uiManager.isTopUI(UIID.UIRoom)) {
             return;
         }
 

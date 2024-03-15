@@ -1,5 +1,5 @@
 {
-  "__version__": "1.0.1",
+  "__version__": "1.0.0",
   "information": {
     "customSplash": {
       "id": "customSplash",
@@ -17,6 +17,15 @@
       "removeSplash": {
         "complete": true,
         "form": "https://creator-api.cocos.com/api/form/show?sid=07b404ec8dbaaf51745a7df47cd8f37c"
+      }
+    },
+    "build-web-mobile": {
+      "id": "build-web-mobile",
+      "label": "build-web-mobile",
+      "enable": false,
+      "build-web-mobile": {
+        "complete": false,
+        "form": "https://creator-api.cocos.com/api/form/show?"
       }
     }
   }

@@ -22,30 +22,25 @@ const {ccclass, property} = _decorator;
 
 @ccclass('UIControl')
 export default class UIControl extends UIView {
+
+    @property(Prefab)
+    blockPrefab: Prefab;
+
+    @property(Prefab)
+    tetrisPrefab: Prefab;
+
+    @property([Prefab])
+    layoutPrefabList: Prefab[] = [];
+
     // 自己的控制脚本
     private my: Tetris
 
     @property(Label)
     private title: Label
 
-    @property(Prefab)
-    tetrisPrefab: Prefab
-
-    @property(Prefab)
-    blockPrefab: Prefab
-
-    @property(Prefab)
-    itemCtrlPrefab: Prefab
-
-    @property([Prefab])
-    layoutPrefabList: Prefab[] = [];
-
     // 存放道具的容器
     @property(Layout)
     itemContainer: Layout
-
-    @property(Layout)
-    itemCtrlContainer: Layout
 
     tetrisManager: { [key: number]: Tetris } = {}
 
@@ -60,22 +55,14 @@ export default class UIControl extends UIView {
 
     public onOpen(fromUI: number, ...args) {
         super.onOpen(fromUI, ...args);
-        Game.log.logView(args, "UIControl.onOpen");
         Game.event.addEventListener("onFrame", this.onFrame, this);
         let tableInfo = args[0] as TableInfo;
         let room: Room = tableInfo.room;
         this.title.string = room.name
         Game.random.setSeed(tableInfo.randSeed);
-
-        let layoutPrefab = null;
-        for(let i=0;i<this.layoutPrefabList.length; i++) {
-            let prefab = this.layoutPrefabList[i];
-            if (prefab.name == room.prefab) {
-                layoutPrefab = prefab
-            }
-        }
-
+        Game.log.logView(args, "UIControl.onOpen");
         // 添加布局
+        let layoutPrefab = this.layoutPrefabList.filter((prefab) => prefab.name == room.prefab)[0]
         let parent: Node = Game.resUtil.instantiate(layoutPrefab);
         this.node.addChild(parent);
 
@@ -100,21 +87,23 @@ export default class UIControl extends UIView {
             console.log(containerName);
 
             let container: Node = parent.getChildByName(containerName);
-            let tNode: Node = Game.resUtil.instantiate(this.tetrisPrefab);
-            let tetris: Tetris = tNode.getComponent("Tetris") as Tetris;
+            container.getComponent(Sprite).spriteFrame = null;
 
+            let tNode: Node = Game.resUtil.instantiate(this.tetrisPrefab);
+            let tetris: Tetris = tNode.getComponent(Tetris);
             this.initTetris(player, tetris);
+
             if (containerName == "my") {
                 this.my = tetris;
             } else {
-                let s = container.getComponent(UITransform).width * 1.0 / 500;
-                tNode.setScale(s, s);
+                let scale = container.getComponent(UITransform).width * 1.0 / 500;
+                tNode.setScale(scale, scale);
             }
-            container.getComponent(Sprite).spriteFrame = null;
+
             container.addChild(tNode);
 
             // 发送道具的按钮
-            this.initItemCtrl(player);
+            // this.initItemCtrl(player);
 
             // 保存每个tetris对象
             this.tetrisManager[uid] = tetris;
@@ -134,32 +123,79 @@ export default class UIControl extends UIView {
         Game.event.removeEventListener("onFrame", this.onFrame, this);
     }
 
-    initItemCtrl(player: TableInfo_Player) {
-        let btn = Game.resUtil.instantiate(this.itemCtrlPrefab);
-        btn.getComponent(Sprite).color = GetTeamColor(player.teamId);
-        btn.getChildByName("Label").getComponent(Label).string = `T/${player.teamId}`;
-        btn.on("click", () => {
-            if (this.my.player.isEnd) {
-                return;
-            }
-            let children = this.itemContainer.node.children;
-            if (children.length > 0) {
-                let node = children[0];
-                let block: Block = node.getComponent("Block") as Block;
-                let [to, from, val] = [player.profile?.userId, Game.storage.getUser(), block.getValue()];
-                Game.log.logView(`player from ${from} send item controller to ${to} value ${block.getValue()}`);
-                this.serialize(block.getItem(), [val], to, from);
-                this.itemContainer.node.removeChild(node);
-            }
-        }, this);
-        this.itemCtrlContainer.node.addChild(btn)
-    }
+    // initItemCtrl(player: TableInfo_Player) {
+    //     let btn = Game.resUtil.instantiate(this.itemCtrlPrefab);
+    //     btn.getComponent(Sprite).color = GetTeamColor(player.teamId);
+    //     btn.getChildByName("Label").getComponent(Label).string = `T/${player.teamId}`;
+    //     btn.on("click", () => {
+    //         if (this.my.player.isEnd) {
+    //             return;
+    //         }
+    //         let children = this.itemContainer.node.children;
+    //         if (children.length > 0) {
+    //             let node = children[0];
+    //             let block: Block = node.getComponent("Block") as Block;
+    //             let [to, from, val] = [player.profile?.userId, Game.storage.getUser(), block.getValue()];
+    //             Game.log.logView(`player from ${from} send item controller to ${to} value ${block.getValue()}`);
+    //             this.serialize(block.getItem(), [val], to, from);
+    //             this.itemContainer.node.removeChild(node);
+    //         }
+    //     }, this);
+    //     this.itemCtrlContainer.node.addChild(btn)
+    // }
 
     initTetris(player: TableInfo_Player, tetris: Tetris) {
+
+        let [
+            uid,
+            teamId,
+            name
+        ] = [
+            player.profile?.userId,
+            player.teamId,
+            player.profile?.name
+        ]
+
+        tetris.node.on(Node.EventType.TOUCH_END, () => {
+            let [isMyEnd, myTeamId, myId] = [
+                this.my.player.isEnd,
+                this.my.player.teamId,
+                this.my.player.uid
+            ]
+            if (isMyEnd) return;
+
+            let isTeamMeta = teamId == myTeamId;
+            let children = this.itemContainer.node.children;
+            children.forEach((node) => {
+                let [bSend, block] = [false, node.getComponent(Block)];
+
+                switch (block.getItem()) {
+                    case ActionType.ITEM_DEL_ROW:
+                        if (isTeamMeta) bSend = true;
+                        break;
+                    case ActionType.ITEM_ADD_ROW:
+                        if (!isTeamMeta) bSend = true;
+                        break
+                }
+
+                if (bSend) {
+                    let [to, from, val] = [uid, myId, block.getValue()];
+                    Game.log.logView(`player from ${from} send item controller to ${to} value ${block.getValue()}`);
+                    this.serialize(block.getItem(), [val], to, from);
+                    this.itemContainer.node.removeChild(node);
+                    return;
+                }
+
+            })
+
+        }, this);
+
+
         tetris.onAdded({
-            uid: player.profile?.userId,
-            isMy: player.profile?.userId === Game.storage.getUser(),
-            teamId: player.teamId,
+            uid: uid,
+            isMy: uid === Game.storage.getUser(),
+            teamId,
+            name,
         });
         // 玩家的所有事件
         ['nextPiece', 'pos', 'end', 'matrix', 'score', 'combo', 'combo_3', 'combo_4'].forEach(key => {
@@ -259,7 +295,7 @@ export default class UIControl extends UIView {
                     if (action.key == ActionType.ITEM_ADD_ROW) {
                         randList = Game.random.getRandomByMinMaxList(0, 11, 2);
                     }
-                    let blockNode = Game.resUtil.instantiate(this.blockPrefab);
+                    let blockNode: Node = Game.resUtil.instantiate(this.blockPrefab);
                     let blockScript = blockNode.getComponent("Block") as Block;
                     blockScript.drawValue(value);
                     this.node.addChild(blockNode);

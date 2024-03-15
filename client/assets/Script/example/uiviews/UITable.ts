@@ -19,11 +19,11 @@ export default class UITable extends UIView {
     @property(Label)
     private info: Label
 
-    @property(Prefab)
-    private playerPrefab: Prefab
-
     @property(Node)
     private table: Node
+
+    @property(Prefab)
+    playerPrefab: Prefab;
 
     seatNodeMap: { [key: number]: Node } = {}
 
@@ -46,10 +46,8 @@ export default class UITable extends UIView {
         ];
         for (let i = 0; i < 6; i++) {
             let [node, seatId] = [Game.resUtil.instantiate(this.playerPrefab), i];
-
             let label = node.getChildByName("Label").getComponent(Label);
             label.string = "";
-
             let layout = node.getChildByName("Layout");
             let [sitBtn, kickBtn] = [layout.getChildByName("Button-001"), layout.getChildByName("Button")];
 
