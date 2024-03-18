@@ -30,11 +30,9 @@ func (r *RoomService) AfterInit() {
 				conf   = v.GetConfig()
 				roomId = conf.RoomId
 			)
-			err := r.Leave(s, &proto.Leave{
-				RoomId: roomId,
-			})
+			err := v.Leave(s)
 			if err != nil {
-				log.Info("player %d leave room %s err", s.UID(), roomId)
+				log.Info("player %d leave room %s err %+v", s.UID(), roomId, err)
 			}
 		}
 	})

@@ -7,7 +7,7 @@
       },
       "buildPath": "project://build",
       "outputName": "web-mobile",
-      "mainBundleCompressionType": "merge_all_json",
+      "mainBundleCompressionType": "merge_dep",
       "platform": "web-mobile",
       "startScene": "9cd929f4-07e5-466d-b5bf-a1036c927a6a",
       "mainBundleIsRemote": false,
@@ -15,13 +15,18 @@
       "useBuiltinServer": false,
       "scenes": [
         {
-          "url": "db://assets/Scene/example_ui.scene",
+          "url": "db://assets/example_ui.scene",
           "uuid": "9cd929f4-07e5-466d-b5bf-a1036c927a6a"
+        },
+        {
+          "url": "db://assets/bundle1/scene/main.scene",
+          "uuid": "8f5bbf55-87cb-481c-8f5f-734a39cd602f",
+          "bundle": "db://assets/bundle1"
         }
       ],
       "md5Cache": true,
       "useSplashScreen": true,
-      "debug": true,
+      "debug": false,
       "bundleConfigs": [
         {
           "name": "main",
@@ -36,6 +41,11 @@
         {
           "name": "start-scene",
           "root": "",
+          "output": true
+        },
+        {
+          "root": "db://assets/resources",
+          "name": "resources",
           "output": true
         },
         {

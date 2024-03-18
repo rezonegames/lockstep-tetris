@@ -131,7 +131,9 @@ func (r *Room) Leave(s *session.Session) error {
 	}
 
 EXIT:
-	log.Info(r.Format("[Leave] user %d", uid))
+	if rs != nil {
+		log.Info(r.Format("[Leave] user %d", uid))
+	}
 	models.RemoveRoundSession(uid)
 	return nil
 }

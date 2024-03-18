@@ -12,7 +12,7 @@
     },
     "buildPath": "project://build",
     "outputName": "web-mobile",
-    "mainBundleCompressionType": "merge_all_json",
+    "mainBundleCompressionType": "merge_dep",
     "platform": "web-mobile",
     "startScene": "9cd929f4-07e5-466d-b5bf-a1036c927a6a",
     "mainBundleIsRemote": false,
@@ -20,13 +20,18 @@
     "useBuiltinServer": false,
     "scenes": [
       {
-        "url": "db://assets/Scene/example_ui.scene",
+        "url": "db://assets/example_ui.scene",
         "uuid": "9cd929f4-07e5-466d-b5bf-a1036c927a6a"
+      },
+      {
+        "url": "db://assets/bundle1/scene/main.scene",
+        "uuid": "8f5bbf55-87cb-481c-8f5f-734a39cd602f",
+        "bundle": "db://assets/bundle1"
       }
     ],
     "md5Cache": true,
     "useSplashScreen": true,
-    "debug": true,
+    "debug": false,
     "bundleConfigs": [
       {
         "name": "main",
@@ -44,6 +49,11 @@
         "output": true
       },
       {
+        "root": "db://assets/resources",
+        "name": "resources",
+        "output": true
+      },
+      {
         "root": "db://assets/bundle1",
         "name": "bundle1",
         "output": true
@@ -57,14 +67,14 @@
         "id": "1710504212594",
         "progress": 1,
         "state": "success",
-        "stage": "build",
-        "message": "2024-3-15 20:18:29 build success in 49414 ms!",
+        "stage": "run",
+        "message": "2024-3-18 19:32:40 run package /Users/zyh/work/my-code/tetris/client/build/web-mobile success!",
         "options": {
           "name": "cocos_creator_framework",
           "server": "",
           "platform": "web-mobile",
           "buildPath": "project://build",
-          "debug": true,
+          "debug": false,
           "md5Cache": true,
           "skipCompressTexture": false,
           "sourceMaps": false,
@@ -90,6 +100,11 @@
               "output": true
             },
             {
+              "root": "db://assets/resources",
+              "name": "resources",
+              "output": true
+            },
+            {
               "root": "db://assets/bundle1",
               "name": "bundle1",
               "output": true
@@ -97,7 +112,7 @@
           ],
           "useBuiltinServer": false,
           "mainBundleIsRemote": false,
-          "mainBundleCompressionType": "merge_all_json",
+          "mainBundleCompressionType": "merge_dep",
           "useSplashScreen": true,
           "bundleCommonChunk": false,
           "packAutoAtlas": true,
@@ -106,8 +121,13 @@
           "taskName": "web-mobile",
           "scenes": [
             {
-              "url": "db://assets/Scene/example_ui.scene",
+              "url": "db://assets/example_ui.scene",
               "uuid": "9cd929f4-07e5-466d-b5bf-a1036c927a6a"
+            },
+            {
+              "url": "db://assets/bundle1/scene/main.scene",
+              "uuid": "8f5bbf55-87cb-481c-8f5f-734a39cd602f",
+              "bundle": "db://assets/bundle1"
             }
           ],
           "packages": {},
@@ -115,7 +135,7 @@
           "buildMode": "normal",
           "logDest": "project://temp/builder/log/web-mobile3-15-2024 20-03.log"
         },
-        "time": "3-15-2024 20:17:39",
+        "time": "3-18-2024 19:31:27",
         "dirty": false
       }
     }
