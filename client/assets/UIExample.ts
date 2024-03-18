@@ -19,7 +19,7 @@ export default class UIExample extends Component {
     start() {
         let [total, taskList, bundleName] = [
             5,
-            ["anim", "Texture", "Prefab", "example", "scene"],
+            ["Prefab", "scene", "example", "Texture", "anim"],
             "bundle1"
         ];
 

@@ -53,7 +53,8 @@
           "name": "bundle1",
           "output": true
         }
-      ]
+      ],
+      "experimentalEraseModules": true
     },
     "options": {
       "web-mobile": {
