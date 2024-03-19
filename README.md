@@ -84,3 +84,8 @@ linux打包
 ./server/bin/build.sh
 将生成的文件拷贝到目标服务器，运行之，也可放入docker
 ```
+
+联系
+```
+457716947@qq.com
+```
