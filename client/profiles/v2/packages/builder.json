@@ -69,7 +69,7 @@
         "progress": 1,
         "state": "success",
         "stage": "run",
-        "message": "2024-3-18 21:12:46 run package /Users/zyh/work/my-code/tetris/client/build/web-mobile success!",
+        "message": "2024-3-20 16:25:30 run package /Users/zyh/work/my-code/tetris/client/build/web-mobile success!",
         "options": {
           "name": "cocos_creator_framework",
           "server": "",
@@ -136,7 +136,7 @@
           "buildMode": "normal",
           "logDest": "project://temp/builder/log/web-mobile3-15-2024 20-03.log"
         },
-        "time": "3-18-2024 21:11:39",
+        "time": "3-20-2024 16:21:15",
         "dirty": false
       }
     }

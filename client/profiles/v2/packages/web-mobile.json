@@ -59,7 +59,7 @@
     "options": {
       "web-mobile": {
         "orientation": "landscape",
-        "embedWebDebugger": true,
+        "embedWebDebugger": false,
         "cullEngineAsmJsModule": false,
         "__version__": "1.0.1"
       }
@@ -85,7 +85,7 @@
       },
       "1710504212594": {
         "orientation": "landscape",
-        "embedWebDebugger": true,
+        "embedWebDebugger": false,
         "cullEngineAsmJsModule": false,
         "__version__": "1.0.1"
       }
