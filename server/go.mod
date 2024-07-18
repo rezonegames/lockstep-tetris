@@ -59,5 +59,3 @@ require (
 	google.golang.org/genproto v0.0.0-20210630183607-d20f26d13c79 // indirect
 	google.golang.org/grpc v1.39.0 // indirect
 )
-
-replace github.com/lonng/nano => ../mynano
